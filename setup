@@ -90,6 +90,9 @@ esac
 	ln raddb/certs/dh /usr/local/etc/raddb/certs/dh
 
 	make install
+	/bin/sh /usr/src/freeradius-server/debian/freeradius-common.postinst configure
+	chown -R freerad /usr/local/etc/raddb/ /usr/local/var/log/radius/
+	chmod -R o+x /usr/local/var
 )
 
 if [ -d /opt/$VENDOR/$PROJECT ]; then

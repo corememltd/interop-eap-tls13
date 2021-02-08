@@ -65,7 +65,7 @@ SystemCallArchitectures=native
 ReadOnlyDirectories=/usr/local/etc/raddb/
 
 # We can read and write to the log directory.
-ReadWriteDirectories=/var/log/freeradius/
+ReadWriteDirectories=/usr/local/var/log/radius/
 
 [Install]
 WantedBy=multi-user.target
