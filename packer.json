@@ -1,0 +1,86 @@
+{
+  "builders": [
+    {
+      "ssh_agent_auth": true,
+      "ssh_host": "{{ user `ssh_host` }}",
+      "ssh_username": "{{ user `ssh_user` }}",
+      "type": "null"
+    },
+    {
+      "changes": [
+        "VOLUME [\"/run/lock\"]",
+        "ENTRYPOINT [\"/sbin/init\"]"
+      ],
+      "commit": true,
+      "image": "debian:buster-slim",
+      "type": "docker"
+    }
+  ],
+  "post-processors": [
+    {
+      "only": [
+        "docker"
+      ],
+      "repository": "{{ user `vendor`}}/{{ user `project` }}",
+      "tags": [
+        "latest"
+      ],
+      "type": "docker-tag"
+    }
+  ],
+  "provisioners": [
+    {
+      "inline": [
+        "passwd -d root"
+      ],
+      "inline_shebang": "/bin/sh -eux",
+      "only": [
+        "docker"
+      ],
+      "type": "shell"
+    },
+    {
+      "inline": [
+        "git bundle create {{ user `family`}}.{{ build_name }}.git HEAD"
+      ],
+      "inline_shebang": "/bin/sh -eux",
+      "type": "shell-local"
+    },
+    {
+      "destination": "/tmp/{{ user `family`}}.git",
+      "generated": true,
+      "source": "{{ user `family`}}.{{ build_name }}.git",
+      "type": "file"
+    },
+    {
+      "inline": [
+        "rm {{ user `family`}}.{{ build_name }}.git"
+      ],
+      "inline_shebang": "/bin/sh -eux",
+      "type": "shell-local"
+    },
+    {
+      "environment_vars": [
+        "VENDOR={{ user `vendor` }}",
+        "PROJECT={{ user `project` }}"
+      ],
+      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:+$SUDO --preserve-env=PACKER_BUILDER_TYPE,VENDOR,PROJECT} /bin/sh -eux '{{ .Path }}'",
+      "script": "setup",
+      "type": "shell"
+    },
+    {
+      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:-} /bin/sh -eux '{{ .Path }}'",
+      "inline": [
+        "find \"$(getent passwd root | cut -d: -f6)/.ssh\" -type f -print0 2>&- | xargs -r -0 shred -u",
+        "rm -rf \"$(getent passwd root | cut -d: -f6)/.ssh\""
+      ],
+      "type": "shell"
+    }
+  ],
+  "variables": {
+    "family": "{{ user `vendor`}}-{{ user `project` }}",
+    "name": "{{ user `commit` }}",
+    "ssh_host": "192.0.2.100",
+    "ssh_user": "{{ env `USER` }}"
+  }
+}

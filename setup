@@ -1,0 +1,121 @@
+#!/bin/sh
+
+set -eux
+
+[ "${VENDOR:-}" -a "${PROJECT:-}" ] || { echo missing VENDOR/PROJECT environment variables; exit 1; }
+BRANCH=${BRANCH:-master}
+
+. /etc/environment
+export https_proxy http_proxy ftp_proxy
+
+export DEBIAN_FRONTEND=noninteractive
+
+{
+	echo tzdata tzdata/Areas select Etc;
+	echo tzdata tzdata/Zones/Etc select UTC;
+} | debconf-set-selections
+
+apt-get update
+apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+		--option=Dpkg::options::=--force-unsafe-io --no-install-recommends upgrade
+apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+		--option=Dpkg::options::=--force-unsafe-io install --no-install-recommends \
+	autoconf \
+	automake \
+	build-essential \
+	ca-certificates \
+	cmake \
+	curl \
+	git \
+	libdbus-1-dev \
+	libnl-3-dev \
+	libnl-genl-3-dev \
+	libnl-route-3-dev \
+	libssl-dev \
+	libtalloc-dev \
+	libtool \
+	make \
+	openssl \
+	pkg-config \
+	systemd-sysv
+
+apt-get -y autoremove
+apt-get clean
+find /var/lib/apt/lists -type f -delete
+
+case "${PACKER_BUILDER_TYPE:-}" in
+docker)
+	# running systemd in a container
+	rm -f /usr/sbin/policy-rc.d
+
+	# disable harmless error
+	systemctl mask dev-hugepages.mount
+esac
+
+(
+	cd /usr/src
+	git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
+	cd libkqueue
+	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
+	make -j$(($(getconf _NPROCESSORS_ONLN)-1))
+	make install
+)
+(
+	cd /usr/src
+	# https://github.com/jimdigriz/freeradius-oauth2-perl#8021x-1
+#	git clone --single-branch --branch hostap_2_9 git://w1.fi/hostap.git
+	git clone --single-branch --branch tls13 https://gitlab.com/jimdigriz/hostap.git
+        cd hostap
+	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
+	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
+	ln -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
+)
+(
+	cd /usr/src
+#	git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
+	git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
+	cd freeradius-server
+	./configure
+	make -j$(($(getconf _NPROCESSORS_ONLN)-1))
+
+	# make the build for testing faster
+	mkdir -p /usr/local/etc/raddb/certs
+	curl -f --compressed -o /usr/local/etc/raddb/certs/dh https://ssl-config.mozilla.org/ffdhe2048.txt
+
+	make install
+
+        ln -s -t raddb/certs /usr/local/etc/raddb/certs/dh
+	sed -i -e '/# testing 1\.3 /,/^$/ s/#\([a-zA-Z]\)/\1/' src/tests/Makefile
+	sed -i -e '/eapol_test.peap-eap-tls/ d' src/tests/Makefile
+	make test
+)
+
+if [ -d /opt/$VENDOR/$PROJECT ]; then
+	git -C /opt/$VENDOR/$PROJECT reset --hard
+	git -C /opt/$VENDOR/$PROJECT pull origin HEAD
+else
+	mkdir /opt/$VENDOR
+	git clone /tmp/$VENDOR-$PROJECT.git /opt/$VENDOR/$PROJECT
+fi
+
+shred -u /tmp/$VENDOR-$PROJECT.git
+
+#find /opt/$VENDOR/$PROJECT/services/systemd -type f | xargs ln -s -t /lib/systemd/system
+#ls /opt/$VENDOR/$PROJECT/services/systemd | xargs systemctl enable
+#
+#mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
+#mv /etc/freeradius/proxy.conf /etc/freeradius/proxy.conf.orig
+#
+#find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete
+#find /opt/$VENDOR/$PROJECT/services/freeradius/mods-config -mindepth 1 -type d | xargs -r -t ln -f -s -t /etc/freeradius/mods-config
+#find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l  | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
+#find /opt/$VENDOR/$PROJECT/services/freeradius/sites-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/sites-enabled
+#find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -s -f -t /etc/freeradius/policy.d
+
+freeradius -C || freeradius -XC
+if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then
+	invoke-rc.d freeradius start
+	invoke-rc.d freeradius reload
+fi
+
+exit 0
