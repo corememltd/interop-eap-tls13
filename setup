@@ -102,9 +102,9 @@ fi
 
 shred -u /tmp/$VENDOR-$PROJECT.git
 
-#find /opt/$VENDOR/$PROJECT/services/systemd -type f | xargs ln -s -t /lib/systemd/system
-#ls /opt/$VENDOR/$PROJECT/services/systemd | xargs systemctl enable
-#
+find /opt/$VENDOR/$PROJECT/services/systemd -type f | xargs ln -s -t /lib/systemd/system
+ls /opt/$VENDOR/$PROJECT/services/systemd | xargs systemctl enable
+
 #mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
 #mv /etc/freeradius/proxy.conf /etc/freeradius/proxy.conf.orig
 #
@@ -115,10 +115,6 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 #find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -s -f -t /etc/freeradius/policy.d
 
 radiusd -C || radiusd -XC
-
-ln -s -t /lib/systemd/system /usr/src/freeradius-server/debian/freeradius.service
-systemctl enable freeradius.service
-
 if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then
 	invoke-rc.d radiusd start
 	invoke-rc.d radiusd reload
