@@ -49,6 +49,8 @@ Some information about the environment:
 
 The project is already configured to test TLSv1.3 without the user having to edit any configuration files.
 
+On the target system (container, server or VM) the project is located at `/opt/networkradius/interop-eap-tls13` and various configuration files are symlink'ed into place. The `setup` shell script contains the machinery to bring up the project on a bare system.
+
 ## Testing
 
 The project comes with a number of `eapol_test` configuration files for you to use by running:
