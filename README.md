@@ -36,6 +36,12 @@ Some information about the environment:
          * [`eapol_test`](eapol_test): `eapol_test` configuration files
      * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `freeradius`/... you can restart `freeradius` (`systemctl restartfreeradius` or `freeradius -X`) to reason about those changes
 
+## Deployment to a Server/VM
+
+...
+
+# Usage
+
 ## Testing
 
 Edit `/tmp/eapol_test.conf` with your credentials and then run:
@@ -77,7 +83,3 @@ To put FreeRADIUS into debugging mode, use the following:
     freeradius -X | tee /tmp/debug
 
 The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
-
-# Deploy
-
-...
