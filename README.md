@@ -34,7 +34,7 @@ Some information about the environment:
      * they are as described:
          * [`services`](services): `services` configuration (including `freeradius`)
          * [`eapol_test`](eapol_test): `eapol_test` configuration files
-     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `freeradius`/... you can restart `freeradius` (`systemctl restartfreeradius` or `freeradius -X`) to reason about those changes
+     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `freeradius`/... you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
 
 ## Deployment to a Server/VM
 
@@ -42,7 +42,7 @@ Some information about the environment:
 
 # Usage
 
-The project is already configured to test TLSv1.3 without the having to edit any configuration files.
+The project is already configured to test TLSv1.3 without the user having to edit any configuration files.
 
 ## Testing
 
@@ -67,7 +67,7 @@ If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 yo
 
 The latest EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4).
 
-Though FreeRADIUS defaults to using TLS Close Notify this project configures the Commitment Message codepath as the patches to [`hostap`/`wpa_supplicant`/`eapol_test`](https://w1.fi/) support only this.
+Though FreeRADIUS defaults to using TLS Close Notify this project configures the Commitment Message code path as the patches to [`hostap`/`wpa_supplicant`/`eapol_test`](https://w1.fi/) support only this.
 
 To toggle FreeRADIUS to use TLS Close Notify, edit `/opt/networkradius/interop-eap-tls13/services/freeradius/mods-available/eap-test` to reflect in the `tls-config` section:
 
