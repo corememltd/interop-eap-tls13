@@ -47,7 +47,7 @@ dev: .stamp.docker
 	-docker run -it --rm \
 		-e container=docker \
 		-v $(CURDIR):/opt/$(VENDOR)/$(PROJECT):ro \
-		$(foreach P,1812 1813 2083 3799,--publish=$(P):$(P)/udp --publish=$(P):$(P)/tcp) \
+		--publish=1812:1812/udp --publish=1812:1812/tcp \
 		--tmpfs /run \
 		-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
 		--ulimit memlock=$$((128 * 1024)) \
