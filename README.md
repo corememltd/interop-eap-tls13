@@ -28,7 +28,7 @@ If you have [Docker](https://docker.com/) installed then you can run the followi
 Some information about the environment:
 
  * login details for the container is `root` with no password
- * your local workstation will have the following ports opened
+ * your local workstation will have the following ports exposed:
      * **`1812/{udp,tcp}`:** RADIUS authentication
  * environment makes use of a number of read only bind mounts into the container
      * they are as described:
@@ -56,6 +56,20 @@ The tests in the `eapol_test` directory include:
  * EAP-TLS
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
  * PEAP/{MSCHAPv2,EAP-TLS,EAP-TLS+MSCHAPv2}
+
+### TLS Certificates
+
+If you are running `eapol_test` from your workstation (rather than inside a Docker container or on a server) you will need to copy the certificates into the project to allow authentication to work.
+
+If you are using Docker, use:
+
+    docker cp interop-eap-tls13:/etc/freeradius/certs .
+
+If you are using a server, try:
+
+    rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
+
+### TLS Version
 
 To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
 

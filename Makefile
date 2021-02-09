@@ -45,6 +45,7 @@ endif
 ifneq ($(shell docker version 2>&-),)
 dev: .stamp.docker
 	-docker run -it --rm \
+		--name $(PROJECT) \
 		-e container=docker \
 		-v $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro \
 		-v $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro \
