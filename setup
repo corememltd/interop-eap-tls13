@@ -116,9 +116,10 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 #	git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
 	git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
 	cd freeradius-server
-	# make -n deb
-	fakeroot debian/rules debian/control
-	fakeroot dpkg-buildpackage -b -uc -j$(($(getconf _NPROCESSORS_ONLN)+1))
+	# FR build is racey on Debian parallel builds :(
+	make deb
+	#fakeroot debian/rules debian/control
+	#fakeroot dpkg-buildpackage -b -uc -jauto
 
 	# make testing faster
 	curl -f --compressed -o raddb/certs/dh https://ssl-config.mozilla.org/ffdhe2048.txt
@@ -133,11 +134,12 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 
 	find /usr/src \
 			-maxdepth 1 -type f \
-			-regex '/\(freeradius_\|libfreeradius3_\|freeradius-\(common\|config\|utils\)\).*\.deb$' \
+			-regex '.*/\(freeradius_\|libfreeradius3_\|freeradius-\(common\|config\|utils\)\).*\.deb' \
 		| xargs -t apt-get -y install
 )
 
 mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
+ln -s -t /etc/freeradius /opt/$VENDOR/$PROJECT/services/freeradius/clients.conf
 find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
 
 freeradius -C || freeradius -XC
