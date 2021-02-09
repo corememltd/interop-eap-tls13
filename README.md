@@ -9,7 +9,9 @@ This project supports both building a [Docker](https://docker.com/) container fo
 
 # Preflight
 
-You will require:
+This project should work on both Linux, macOS and [Windows 10 where WSL is installed](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+You will require installed (available through `apt-get install ...` and `yum install ...`):
 
   * `git`
   * `make`
