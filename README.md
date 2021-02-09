@@ -46,12 +46,12 @@ The project is already configured to test TLSv1.3 without the user having to edi
 
 ## Testing
 
-Edit `/tmp/eapol_test.conf` with your credentials and then run:
+The project comes with a number of `eapol_test` configuration files for you to use by running:
 
     cd /opt/networkradius/interop-eap-tls13
     eapol_test -s testing123 -c eapol_test/eapol_test.tls.conf
 
-The tests in the `eapol_test` directory include:
+The tests in the `eapol_test` directory are named after the EAP methods they use and the suite covers:
 
  * EAP-TLS
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
