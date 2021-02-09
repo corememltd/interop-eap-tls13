@@ -138,9 +138,10 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		| xargs -t apt-get -y install
 )
 
-mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
-ln -s -t /etc/freeradius /opt/$VENDOR/$PROJECT/services/freeradius/clients.conf
-find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
+find /etc/freeradius/sites-enabled -type f,l -delete
+find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -f -s -t /etc/freeradius/policy.d
+find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l  | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
+find /opt/$VENDOR/$PROJECT/services/freeradius/sites-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/sites-enabled
 
 freeradius -C || freeradius -XC
 if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then

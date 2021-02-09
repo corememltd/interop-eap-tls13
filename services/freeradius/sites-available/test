@@ -1,0 +1,50 @@
+server test {
+	client everyone_ipv6 {
+		ipv6addr = ::/0
+		secret = testing123
+	}
+	client everyone_ipv4 {
+		ipv4addr = 0.0.0.0/0
+		secret = testing123
+	}
+
+	listen {
+		ipv6addr = ::
+		type = auth
+	}
+	listen {
+		ipv4addr = 0.0.0.0
+		type = auth
+	}
+
+authorize {
+	if (User-Name == "bob") {
+		update control {
+			Cleartext-Password := "bob"
+		}
+	}
+
+	chap
+	mschap
+	digest
+	eap-test
+	pap
+}
+
+authenticate {
+	pap
+	chap
+	mschap
+	digest
+	eap-test
+}
+
+accounting {
+	   if (Packet-Src-IP-Address != 255.255.255.255) {
+	      detail
+	   }
+
+	   ok
+}
+
+}

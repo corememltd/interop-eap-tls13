@@ -1,0 +1,7 @@
+test-files.authorize {
+	if (User-Name == "bob") {
+		update control {
+			Cleartext-Password := "bob"
+		}
+	}
+}
