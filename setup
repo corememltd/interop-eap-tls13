@@ -26,17 +26,45 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	ca-certificates \
 	cmake \
 	curl \
+	debhelper \
+	default-libmysqlclient-dev \
+	dh-systemd \
+	fakeroot \
 	git \
+	libcap-dev \
+	libcurl4-openssl-dev \
 	libdbus-1-dev \
+	libgdbm-dev \
+	libhiredis-dev \
+	libiodbc2-dev \
+	libjson-c-dev \
+	libkrb5-dev \
+	libldap2-dev \
+	libmemcached-dev \
 	libnl-3-dev \
 	libnl-genl-3-dev \
 	libnl-route-3-dev \
+	libpam0g-dev \
+	libpcap-dev \
+	libperl-dev \
+	libpq-dev \
+	libreadline-dev \
+	libsasl2-dev \
+	libsqlite3-dev \
 	libssl-dev \
+	libsystemd-dev \
 	libtalloc-dev \
 	libtool \
+	libwbclient-dev \
+	libykclient-dev \
+	libyubikey-dev \
 	make \
 	openssl \
 	pkg-config \
+	python-dev \
+	quilt \
+	samba-dev \
+	ssl-cert \
 	systemd-sysv
 
 apt-get -y autoremove
@@ -52,49 +80,6 @@ docker)
 	systemctl mask dev-hugepages.mount
 esac
 
-(
-	cd /usr/src
-	git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
-	cd libkqueue
-	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
-	make -j$(($(getconf _NPROCESSORS_ONLN)-1))
-	make install
-)
-(
-	cd /usr/src
-	# https://github.com/jimdigriz/freeradius-oauth2-perl#8021x-1
-#	git clone --single-branch --branch hostap_2_9 git://w1.fi/hostap.git
-	git clone --single-branch --branch tls13 https://gitlab.com/jimdigriz/hostap.git
-	cd hostap
-	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
-	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
-	ln -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
-)
-(
-	cd /usr/src
-#	git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
-	git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
-	cd freeradius-server
-	./configure
-	make -j$(($(getconf _NPROCESSORS_ONLN)-1))
-
-	# make the build for testing faster
-	curl -f --compressed -o raddb/certs/dh https://ssl-config.mozilla.org/ffdhe2048.txt
-
-	sed -i -e '/# testing 1\.3 /,/^$/ s/#\([a-zA-Z]\)/\1/' src/tests/Makefile
-	sed -i -e '/eapol_test.peap-eap-tls/ d' src/tests/Makefile
-	make test
-
-	# make the build for testing faster
-	mkdir -p /usr/local/etc/raddb/certs
-	ln raddb/certs/dh /usr/local/etc/raddb/certs/dh
-
-	make install
-	/bin/sh /usr/src/freeradius-server/debian/freeradius-common.postinst configure
-	chown -R freerad /usr/local/etc/raddb/ /usr/local/var/log/radius/
-	chmod -R o+x /usr/local/var
-)
-
 if [ -d /opt/$VENDOR/$PROJECT ]; then
 	git -C /opt/$VENDOR/$PROJECT reset --hard
 	git -C /opt/$VENDOR/$PROJECT pull origin HEAD
@@ -105,22 +90,60 @@ fi
 
 shred -u /tmp/$VENDOR-$PROJECT.git
 
-find /opt/$VENDOR/$PROJECT/services/systemd -type f | xargs ln -s -t /lib/systemd/system
-ls /opt/$VENDOR/$PROJECT/services/systemd | xargs systemctl enable
+(
+	set -eu
+	cd /usr/src
+	git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
+	cd libkqueue
+	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
+	make -j$(($(getconf _NPROCESSORS_ONLN)+1))
+	make install
+)
+(
+	set -eu
+	cd /usr/src
+	# https://github.com/jimdigriz/freeradius-oauth2-perl#8021x-1
+#	git clone --single-branch --branch hostap_2_9 git://w1.fi/hostap.git
+	git clone --single-branch --branch tls13 https://gitlab.com/jimdigriz/hostap.git
+	cd hostap
+	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
+	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
+	ln -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
+)
+(
+	set -eu
+	cd /usr/src
+#	git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
+	git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
+	cd freeradius-server
+	# make -n deb
+	fakeroot debian/rules debian/control
+	fakeroot dpkg-buildpackage -b -uc -j$(($(getconf _NPROCESSORS_ONLN)+1))
 
-#mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
-#mv /etc/freeradius/proxy.conf /etc/freeradius/proxy.conf.orig
-#
-#find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete
-#find /opt/$VENDOR/$PROJECT/services/freeradius/mods-config -mindepth 1 -type d | xargs -r -t ln -f -s -t /etc/freeradius/mods-config
-#find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l  | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
-#find /opt/$VENDOR/$PROJECT/services/freeradius/sites-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/sites-enabled
-#find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -s -f -t /etc/freeradius/policy.d
+	# make testing faster
+	curl -f --compressed -o raddb/certs/dh https://ssl-config.mozilla.org/ffdhe2048.txt
 
-radiusd -C || radiusd -XC
+	sed -i -e '/# testing 1\.3 /,/^$/ s/#\([a-zA-Z]\)/\1/' src/tests/Makefile
+	sed -i -e '/eapol_test.peap-eap-tls/ d' src/tests/Makefile
+	make test
+
+	# make installation faster
+	mkdir -p /etc/freeradius/certs
+	ln raddb/certs/dh /etc/freeradius/certs/dh
+
+	find /usr/src \
+			-maxdepth 1 -type f \
+			-regex '/\(freeradius_\|libfreeradius3_\|freeradius-\(common\|config\|utils\)\).*\.deb$' \
+		| xargs -t apt-get -y install
+)
+
+mv /etc/freeradius/clients.conf /etc/freeradius/clients.conf.orig
+find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
+
+freeradius -C || freeradius -XC
 if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then
-	invoke-rc.d radiusd start
-	invoke-rc.d radiusd reload
+	invoke-rc.d freeradius start
+	invoke-rc.d freeradius reload
 fi
 
 exit 0
