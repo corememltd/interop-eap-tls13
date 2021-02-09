@@ -35,7 +35,12 @@ The tests in the `/opt/networkradius/interop-eap-tls13/eapol_test` directory inc
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
  * PEAP/{MSCHAPv2,EAP-TLS,EAP-TLS+MSCHAPv2}
 
-To use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_X=1` appropriately.
+To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
+
+If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 you can edit `/opt/networkradius/interop-eap-tls13/services/freeradius/mods-available/eap-test` and to reflect in the `tls-config` section your choosing:
+
+    tls_min_version = "1.0"
+    tls_max_version = "1.3"
 
 ## Using TLS Close Notify or Commitment Message
 
