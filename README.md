@@ -42,6 +42,8 @@ Some information about the environment:
 
 # Usage
 
+The project is already configured to test TLSv1.3 without the having to edit any configuration files.
+
 ## Testing
 
 Edit `/tmp/eapol_test.conf` with your credentials and then run:
