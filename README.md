@@ -21,7 +21,19 @@ Check out a copy of the project:
 
 # Development
 
-...
+If you have [Docker](https://docker.com/) installed then you can run the following to create a suitable local development environment:
+
+    make dev
+
+Some information about the environment:
+
+ * login details for the container is `root` with no password
+ * your local workstation will have the following ports opened
+     * **`1812/{udp,tcp}`:** RADIUS authentication
+ * environment makes use of a number of read only bind mounts into the container
+     * they are as described:
+         * [`freeradius`](freeradius): `freeradius` configuration
+     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `freeradius`/... you can restart `freeradius` (`systemctl restartfreeradius` or `freeradius -X`) to reason about those changes
 
 ## Testing
 
