@@ -34,7 +34,7 @@ Some information about the environment:
      * they are as described:
          * [`services`](services): `services` configuration (including `freeradius`)
          * [`eapol_test`](eapol_test): `eapol_test` configuration files
-     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `freeradius`/... you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
+     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `services/freeradius/...` you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
 
 ## Deployment to a Server/VM
 

@@ -36,18 +36,14 @@ authorize {
 		}
 	}
 
-	chap
 	mschap
-	digest
 	eap-test
 	pap
 }
 
 authenticate {
 	pap
-	chap
 	mschap
-	digest
 	eap-test
 }
 

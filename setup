@@ -138,6 +138,7 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		| xargs -t apt-get -y install
 )
 
+find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete
 find /etc/freeradius/sites-enabled -type f,l -delete
 find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -f -s -t /etc/freeradius/policy.d
 find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l  | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled

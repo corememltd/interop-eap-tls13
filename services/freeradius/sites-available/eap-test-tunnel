@@ -2,7 +2,6 @@ server eap-test-inner {
 
 authorize {
 	filter_username
-	chap
 	mschap
 	suffix
 	update control {
@@ -17,7 +16,6 @@ authorize {
 
 authenticate {
 	pap
-	chap
 	mschap
 	eap-test
 }
