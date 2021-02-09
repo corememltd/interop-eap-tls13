@@ -11,10 +11,22 @@ server test {
 	listen {
 		ipv6addr = ::
 		type = auth
+		proto = udp
+	}
+	listen {
+		ipv6addr = ::
+		type = auth
+		proto = tcp
 	}
 	listen {
 		ipv4addr = 0.0.0.0
 		type = auth
+		proto = udp
+	}
+	listen {
+		ipv4addr = 0.0.0.0
+		type = auth
+		proto = tcp
 	}
 
 authorize {
