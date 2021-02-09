@@ -49,7 +49,7 @@ dev: .stamp.docker
 		-e container=docker \
 		-v $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro \
 		-v $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro \
-		--publish=11812:1812/udp --publish=11812:1812/tcp \
+		--publish=1812:1812/udp --publish=1812:1812/tcp \
 		--tmpfs /run \
 		-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
 		--ulimit memlock=$$((128 * 1024)) \
