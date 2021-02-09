@@ -23,13 +23,16 @@ Check out a copy of the project:
 
 If you have [Docker](https://docker.com/) installed then you can run the following to create a suitable local development environment:
 
-    make dev
+    make dev PORT=1812
+
+**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and can be left out
 
 Some information about the environment:
 
  * login details for the container is `root` with no password
+ * shutdown the container by typing `halt` from within it or use `docker stop interop-eap-tls13`
  * your local workstation will have the following ports exposed:
-     * **`1812/{udp,tcp}`:** RADIUS authentication
+     * **`[PORT]/{udp,tcp}` (default: 1812):** RADIUS authentication
  * environment makes use of a number of read only bind mounts into the container
      * they are as described:
          * [`services`](services): `services` configuration (including `freeradius`)

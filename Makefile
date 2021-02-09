@@ -43,13 +43,14 @@ endif
 
 .PHONY: dev
 ifneq ($(shell docker version 2>&-),)
+dev: PORT ?= 1812
 dev: .stamp.docker
 	-docker run -it --rm \
 		--name $(PROJECT) \
 		-e container=docker \
 		-v $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro \
 		-v $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro \
-		--publish=1812:1812/udp --publish=1812:1812/tcp \
+		--publish=$(PORT):1812/udp --publish=$(PORT):1812/tcp \
 		--tmpfs /run \
 		-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
 		--ulimit memlock=$$((128 * 1024)) \
