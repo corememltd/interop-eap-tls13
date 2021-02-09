@@ -72,7 +72,9 @@ If you are using a server, try:
 
     rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
 
-### TLS Version
+### TLS Configuration
+
+#### Version
 
 To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
 
@@ -81,7 +83,7 @@ If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 yo
     tls_min_version = "1.0"
     tls_max_version = "1.3"
 
-## Using TLS Close Notify or Commitment Message
+#### Using TLS Close Notify or Commitment Message
 
 The latest EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4).
 
@@ -103,3 +105,13 @@ To put FreeRADIUS into debugging mode, use the following:
     freeradius -X | tee /tmp/debug
 
 The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
+
+## Custom Build
+
+### FreeRADIUS
+
+...
+
+### hostap
+
+...
