@@ -3,3 +3,5 @@
 
 packer*
 !packer.json
+
+certs

@@ -48,9 +48,10 @@ The project is already configured to test TLSv1.3 without the user having to edi
 
 Edit `/tmp/eapol_test.conf` with your credentials and then run:
 
-    eapol_test -s testing123 -c /opt/networkradius/interop-eap-tls13/eapol_test/eapol_test.tls.conf
+    cd /opt/networkradius/interop-eap-tls13
+    eapol_test -s testing123 -c eapol_test/eapol_test.tls.conf
 
-The tests in the `/opt/networkradius/interop-eap-tls13/eapol_test` directory include:
+The tests in the `eapol_test` directory include:
 
  * EAP-TLS
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
@@ -58,7 +59,7 @@ The tests in the `/opt/networkradius/interop-eap-tls13/eapol_test` directory inc
 
 To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
 
-If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 you can edit `/opt/networkradius/interop-eap-tls13/services/freeradius/mods-available/eap-test` and to reflect in the `tls-config` section your choosing:
+If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 you can edit `services/freeradius/mods-available/eap-test` and to reflect in the `tls-config` section your choosing:
 
     tls_min_version = "1.0"
     tls_max_version = "1.3"
@@ -69,7 +70,7 @@ The latest EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html
 
 Though FreeRADIUS defaults to using TLS Close Notify this project configures the Commitment Message code path as the patches to [`hostap`/`wpa_supplicant`/`eapol_test`](https://w1.fi/) support only this.
 
-To toggle FreeRADIUS to use TLS Close Notify, edit `/opt/networkradius/interop-eap-tls13/services/freeradius/mods-available/eap-test` to reflect in the `tls-config` section:
+To toggle FreeRADIUS to use TLS Close Notify, edit `services/freeradius/mods-available/eap-test` to reflect in the `tls-config` section:
 
     tls13_send_zero = no
 

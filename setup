@@ -136,6 +136,12 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 			-maxdepth 1 -type f \
 			-regex '.*/\(freeradius_\|libfreeradius3_\|freeradius-\(common\|config\|utils\)\).*\.deb' \
 		| xargs -t apt-get -y install
+
+	mkdir /var/log/freeradius/tlscache
+	chown root:freerad /var/log/freeradius/tlscache
+	chmod 770 /var/log/freeradius/tlscache
+
+	ln -s -t /opt/$VENDOR/$PROJECT /etc/freeradius/certs
 )
 
 find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete
