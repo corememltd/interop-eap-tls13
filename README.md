@@ -32,7 +32,7 @@ Some information about the environment:
  * login details for the container is `root` with no password
  * shutdown the container by typing `halt` from within it or use `docker stop interop-eap-tls13`
  * your local workstation will have the following ports exposed:
-     * **`[PORT]/{udp,tcp}` (default: 1812):** RADIUS authentication
+     * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
  * environment makes use of a number of read only bind mounts into the container
      * they are as described:
          * [`services`](services): `services` configuration (including `freeradius`)
