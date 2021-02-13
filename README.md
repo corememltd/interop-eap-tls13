@@ -35,6 +35,7 @@ Some information about the environment:
  * shutdown the container by typing `halt` from within it or use `docker stop interop-eap-tls13`
  * your local workstation will have the following ports exposed:
      * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
+         * globally listens and accepts any client using the shared secret `testing123`
  * environment makes use of a number of read only bind mounts into the container
      * they are as described:
          * [`services`](services): `services` configuration (including `freeradius`)
@@ -89,7 +90,7 @@ If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 yo
 
 #### Using TLS Close Notify or Commitment Message
 
-The latest EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4).
+The current (revision 14 at time of writing) EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4).
 
 Though FreeRADIUS defaults to using TLS Close Notify this project configures the Commitment Message code path as the patches to [`hostap`/`wpa_supplicant`/`eapol_test`](https://w1.fi/) support only this.
 
