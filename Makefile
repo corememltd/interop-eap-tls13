@@ -88,6 +88,6 @@ DISTCLEAN += packer
 CLEAN += .stamp.packer
 
 .PHONY: release
-release:
+release: notdirty
 	git tag --force $@
 	git push --force --tag origin master
