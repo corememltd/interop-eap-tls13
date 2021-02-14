@@ -54,6 +54,11 @@ The tests in the `eapol_test` directory are named after the EAP methods they use
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
  * PEAP/{MSCHAPv2,EAP-TLS,EAP-TLS+MSCHAPv2}
 
+You can also run the EAP-TLS unit tests which utilise `eapol_test` that come with FreeRADIUS:
+
+    cd /usr/src/freeradius-server
+    make test
+
 ### Debugging
 
 To run FreeRADIUS in debugging mode, use the following:
