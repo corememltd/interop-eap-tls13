@@ -39,6 +39,8 @@ Some information about the environment:
 
 The project is already configured to test TLSv1.3 without the user needing to edit any configuration files.
 
+**N.B.** the instructions below assume you are running commands from on the target system (container, VM or server)
+
 ## Testing
 
 The project comes with a number of `eapol_test` configuration files for you to use by running:
@@ -63,7 +65,7 @@ The debug output will be sent to both your terminal and logged to the file `/tmp
 
 ### TLS Certificates
 
-If you are running `eapol_test` not on the target system (ie. not inside the Docker container or server) you will need to copy the certificates into the project to allow authentication to work.
+If you wish to run `eapol_test` (or another EAP-TLS supplicant) not on the target system (ie. not inside the Docker container or server) you will need to copy the certificates into the project to allow authentication to work.
 
 If you are using Docker, use:
 
@@ -88,6 +90,8 @@ To toggle FreeRADIUS to use TLS Close Notify, edit `services/freeradius/mods-ava
 Now restart FreeRADIUS in the usual manner using:
 
     systemctl restart freeradius
+
+**N.B.** remember by doing this `eapol_test` will no longer work
 
 #### Version
 
