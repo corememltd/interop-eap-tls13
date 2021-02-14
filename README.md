@@ -1,6 +1,6 @@
 Interoperability testing tools for [EAP-TLSv1.3](https://datatracker.ietf.org/doc/draft-ietf-emu-eap-tls13/) and corresponding [EAP types](https://datatracker.ietf.org/doc/draft-ietf-emu-tls-eap-types/).
 
-This project supports both building a [Docker](https://docker.com/) container for development purposes and deployment over SSH to a [Debian 'buster' 10](https://debian.org/) (or [Ubuntu 'focal' 20.04](https://ubuntu.com/)) system.
+This project supports both building and running a [Docker](https://docker.com/) container for development purposes as well as deployment over SSH to a [Debian 'buster' 10](https://debian.org/) (or [Ubuntu 'focal' 20.04](https://ubuntu.com/)) system.
 
 ## Related Links
 
@@ -52,9 +52,18 @@ The tests in the `eapol_test` directory are named after the EAP methods they use
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
  * PEAP/{MSCHAPv2,EAP-TLS,EAP-TLS+MSCHAPv2}
 
+### Debugging
+
+To run FreeRADIUS in debugging mode, use the following:
+
+    systemctl stop freeradius
+    freeradius -X | tee /tmp/debug
+
+The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
+
 ### TLS Certificates
 
-If you are running `eapol_test` from your workstation (rather than inside a Docker container or on a server) you will need to copy the certificates into the project to allow authentication to work.
+If you are running `eapol_test` not on the target system (ie. not inside the Docker container or server) you will need to copy the certificates into the project to allow authentication to work.
 
 If you are using Docker, use:
 
@@ -65,15 +74,6 @@ If you are using a server, try:
     rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
 
 ### TLS Configuration
-
-#### Version
-
-To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
-
-If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 you can edit `services/freeradius/mods-available/eap-test` and to reflect in the `tls-config` section your choosing:
-
-    tls_min_version = "1.0"
-    tls_max_version = "1.3"
 
 #### Using TLS Close Notify or Commitment Message
 
@@ -89,18 +89,39 @@ Now restart FreeRADIUS in the usual manner using:
 
     systemctl restart freeradius
 
-## Debugging
+#### Version
 
-To put FreeRADIUS into debugging mode, use the following:
+To have `eapol_test` use TLSv1.2 or earlier edit the configuration file and change `tls_disable_tlsv1_[0-3]=1` appropriately.
 
-    systemctl stop freeradius
-    freeradius -X | tee /tmp/debug
+If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 you can edit `services/freeradius/mods-available/eap-test` and to reflect in the `tls-config` section your choosing:
 
-The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
+    tls_min_version = "1.0"
+    tls_max_version = "1.3"
+
+##### OpenSSL
+
+Newer operating systems (eg. Ubuntu 'focal' 20.04) globally disable use of anything earlier than TLSv1.2 which can be re-enabled by editing `/etc/ssl/openssl.cnf` and have it top and tailed with:
+
+    openssl_conf = default_conf
+    
+    <<<existing contents of openssl.cnf>>>
+    
+    [default_conf]
+    ssl_conf = ssl_sect
+    
+    [ssl_sect]
+    system_default = system_default_sect
+    
+    [system_default_sect]
+    CipherString = DEFAULT@SECLEVEL=1
 
 # Development
 
-On the target system (container, server or VM) the project is located at `/opt/networkradius/interop-eap-tls13` and various configuration files are symlink'ed into place. The `setup` shell script of the project contains the machinery to bring up the project on a bare system.
+If you wish to build the project locally, the rest of this document describes that process.
+
+Once built (or deployed) the target system (container, server or VM) will locate the project at `/opt/networkradius/interop-eap-tls13` and use symlinks to plumb the various configuration files into place.
+
+The `setup` shell script of the project contains the machinery to bring up the project on a bare system; [Packer](https://packer.io/) is used to orchestrate the running of this script but you should not need to [understand it to use or develop this project](https://packer.io/docs).
 
 ## Preflight
 
@@ -123,11 +144,11 @@ Check out a copy of the project:
 
 ### Docker
 
-Similar to the quick start instructions, but the following will build and launch the Docker image from scratch for you by running:
+Similar to the quick start instructions, but the following will instead build and launch the Docker image from scratch:
 
     make dev PORT=1812
 
-**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and can be left out
+**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and may be left out
 
 Additional information about the environment:
 
@@ -140,7 +161,6 @@ Additional information about the environment:
 ### Server/VM via-SSH
 
 ...
-
 
 ## Custom Build
 
