@@ -144,7 +144,7 @@ Check out a copy of the project:
 
 ### Docker
 
-Similar to the quick start instructions, but the following will instead build and launch the Docker image from scratch:
+Similar to the [quick start instructions](#quick-start-with-docker), but the following will instead build and launch the Docker image from scratch:
 
     make dev PORT=1812 FROM=debian:buster-slim
 
