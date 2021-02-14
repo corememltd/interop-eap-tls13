@@ -146,9 +146,13 @@ Check out a copy of the project:
 
 Similar to the quick start instructions, but the following will instead build and launch the Docker image from scratch:
 
-    make dev PORT=1812
+    make dev PORT=1812 FROM=debian:buster-slim
 
-**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and may be left out
+Where the configuration values are described as:
+
+ * **`PORT` (default: `1812`):** sets the port number that RADIUS authentication is exposed on your workstation
+ * **`FROM` (default: [`debian:buster-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
+     * [`ubuntu:focal`](https://hub.docker.com/_/ubuntu/) is also known to work
 
 Additional information about the environment:
 

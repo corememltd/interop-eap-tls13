@@ -12,7 +12,7 @@
         "ENTRYPOINT [\"/sbin/init\"]"
       ],
       "commit": true,
-      "image": "debian:buster-slim",
+      "image": "{{ user `from` }}",
       "type": "docker"
     }
   ],
@@ -80,6 +80,7 @@
   "variables": {
     "family": "{{ user `vendor`}}-{{ user `project` }}",
     "name": "{{ user `commit` }}",
+    "from": "debian:buster-slim",
     "ssh_host": "192.0.2.100",
     "ssh_user": "{{ env `USER` }}"
   }

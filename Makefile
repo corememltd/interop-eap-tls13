@@ -62,6 +62,9 @@ dev: .stamp.docker
 ifeq ($(shell docker images -q $(VENDOR)/$(PROJECT)),)
 .PHONY: .stamp.docker
 endif
+ifneq ($(FROM),)
+.stamp.docker: PACKER_BUILD_FLAGS += -var from=$(FROM)
+endif
 .stamp.docker: packer.json .stamp.packer setup
 	env TMPDIR=$(CURDIR) ./packer build -on-error=ask -only docker $(PACKER_BUILD_FLAGS) $<
 	touch $@
