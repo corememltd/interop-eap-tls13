@@ -13,8 +13,8 @@ This project should work on both Linux, macOS and [Windows 10 where WSL is insta
 
 You will require installed (available through `apt-get install ...` and `yum install ...`):
 
-  * `curl`
   * `ca-certificates`
+  * `curl`
   * `git`
   * `make`
   * `unzip`
