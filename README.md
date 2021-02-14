@@ -7,30 +7,25 @@ This project supports both building a [Docker](https://docker.com/) container fo
  * [Using EAP-TLS with TLS 1.3 (draft-ietf-emu-eap-tls13)](https://datatracker.ietf.org/doc/draft-ietf-emu-eap-tls13/)
  * [TLS-based EAP types and TLS 1.3 (draft-ietf-emu-tls-eap-types)](https://datatracker.ietf.org/doc/draft-ietf-emu-tls-eap-types/)
 
-# Preflight
-
-This project should work on both Linux, macOS and [Windows 10 where WSL is installed](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
-
-You will require installed (available through `apt-get install ...` and `yum install ...`):
-
-  * `ca-certificates`
-  * `curl`
-  * `git`
-  * `make`
-  * `unzip`
-
-Check out a copy of the project:
-
-    git clone git@gitlab.com:coremem/networkradius/interop-eap-tls13.git
-    cd interop-eap-tls13
-
-# Development
+# Quick Start with Docker
 
 If you have [Docker](https://docker.com/) installed then you can run the following to create a suitable local development environment:
 
-    make dev PORT=1812
+    docker pull registry.gitlab.com/coremem/networkradius/interop-eap-tls13:latest
+    docker tag registry.gitlab.com/coremem/networkradius/interop-eap-tls13:latest networkradius/interop-eap-tls13:latest
+    docker run -it --rm \
+      --name interop-eap-tls13 \
+      -e container=docker \
+      --publish=${PORT:-1812}:1812/udp --publish=${PORT:-1812}:1812/tcp \
+      --tmpfs /run \
+      -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+      --ulimit memlock=$((128 * 1024)) \
+      --security-opt apparmor=unconfined \
+      --cap-add SYS_ADMIN --cap-add NET_ADMIN --cap-add SYS_PTRACE \
+      --stop-signal SIGPWR \
+      networkradius/interop-eap-tls13:latest
 
-**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and can be left out
+**N.B.** to publish the RADIUS service to an alternative port you can export `PORT` (default: `1812`) before running `docker run ...`
 
 Some information about the environment:
 
@@ -39,28 +34,17 @@ Some information about the environment:
  * your local workstation will have the following ports exposed:
      * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
          * globally listens and accepts any client using the shared secret `testing123`
- * environment makes use of a number of read only bind mounts into the container
-     * they are as described:
-         * [`services`](services): `services` configuration (including `freeradius`)
-         * [`eapol_test`](eapol_test): `eapol_test` configuration files
-     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `services/freeradius/...` you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
-
-## Deployment to a Server/VM
-
-...
 
 # Usage
 
-The project is already configured to test TLSv1.3 without the user having to edit any configuration files.
-
-On the target system (container, server or VM) the project is located at `/opt/networkradius/interop-eap-tls13` and various configuration files are symlink'ed into place. The `setup` shell script contains the machinery to bring up the project on a bare system.
+The project is already configured to test TLSv1.3 without the user needing to edit any configuration files.
 
 ## Testing
 
 The project comes with a number of `eapol_test` configuration files for you to use by running:
 
     cd /opt/networkradius/interop-eap-tls13
-    eapol_test -s testing123 -c eapol_test/eapol_test.tls.conf
+    eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
 
 The tests in the `eapol_test` directory are named after the EAP methods they use and the suite covers:
 
@@ -113,6 +97,50 @@ To put FreeRADIUS into debugging mode, use the following:
     freeradius -X | tee /tmp/debug
 
 The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
+
+# Development
+
+On the target system (container, server or VM) the project is located at `/opt/networkradius/interop-eap-tls13` and various configuration files are symlink'ed into place. The `setup` shell script of the project contains the machinery to bring up the project on a bare system.
+
+## Preflight
+
+This project should work on both Linux, macOS and [Windows 10 where WSL is installed](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+
+You will require installed (available through `apt-get install ...` and `yum install ...`):
+
+  * `ca-certificates`
+  * `curl`
+  * `git`
+  * `make`
+  * `unzip`
+
+Check out a copy of the project:
+
+    git clone https://gitlab.com/coremem/networkradius/interop-eap-tls13.git
+    cd interop-eap-tls13
+
+## Targets
+
+### Docker
+
+Similar to the quick start instructions, but the following will build and launch the Docker image from scratch for you by running:
+
+    make dev PORT=1812
+
+**N.B.** `PORT` sets the port number that RADIUS authentication is exposed on your workstation, it defaults to `1812` and can be left out
+
+Additional information about the environment:
+
+ * environment makes use of a number of read only bind mounts into the container
+     * they are as described:
+         * [`services`](services): `services` configuration (including `freeradius`)
+         * [`eapol_test`](eapol_test): `eapol_test` configuration files
+     * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `services/freeradius/...` you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
+
+### Server/VM via-SSH
+
+...
+
 
 ## Custom Build
 

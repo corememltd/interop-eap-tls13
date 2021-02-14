@@ -83,3 +83,8 @@ DISTCLEAN += packer
 	./packer validate $(PACKER_BUILD_FLAGS) $<
 	@touch $@
 CLEAN += .stamp.packer
+
+.PHONY: release
+release:
+	git tag --force $@
+	git push --force --tag origin master
