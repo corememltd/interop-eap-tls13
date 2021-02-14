@@ -3,14 +3,18 @@ image: docker:20.10
 services:
   - name: docker:dind
 
+stages:
+  - build
+
 build:
+  stage: build
   before_script:
     - docker info
+    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - apk update
     - apk add ca-certificates curl git make unzip
   script:
     - make -C $CI_PROJECT_DIR .stamp.docker USER=$GITLAB_USER_LOGIN
-    - echo -n $CI_JOB_TOKEN | docker login -u gitlab-ci-token --password-stdin $CI_REGISTRY
     - docker tag networkradius/interop-eap-tls13 registry.gitlab.com/coremem/networkradius/interop-eap-tls13:$CI_COMMIT_SHORT_SHA
     - docker tag networkradius/interop-eap-tls13 registry.gitlab.com/coremem/networkradius/interop-eap-tls13
     - docker push registry.gitlab.com/coremem/networkradius/interop-eap-tls13:$CI_COMMIT_SHORT_SHA
