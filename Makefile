@@ -74,6 +74,19 @@ dev:
 	@{ echo you need Docker to be installed to start a dev environment >&2; exit 1; }
 endif
 
+.PHONY: deploy
+ifneq ($(SSH_HOST),)
+deploy: PACKER_BUILD_FLAGS += -var ssh_host=$(SSH_HOST)
+endif
+ifneq ($(SSH_USER),)
+deploy: PACKER_BUILD_FLAGS += -var ssh_user=$(SSH_USER)
+endif
+deploy: packer.json .stamp.packer
+ifeq ($(SSH_HOST),)
+	@{ echo you need Docker to be installed to start a dev environment >&2; exit 1; }
+endif
+	env TMPDIR=$(CURDIR) ./packer build -only null $(PACKER_BUILD_FLAGS) $<
+
 packer_$(PACKER_VERSION)_$(KERNEL)_$(MACHINE).zip:
 	curl -f -O -J -L https://releases.hashicorp.com/packer/$(PACKER_VERSION)/$@
 DISTCLEAN += $(wildcard packer_*.zip)

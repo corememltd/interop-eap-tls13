@@ -93,8 +93,14 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 (
 	set -eu
 	cd /usr/src
-	git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
-	cd libkqueue
+	if [ -d libkqueue ]; then
+		cd libkqueue
+		git reset --hard
+		git pull
+	else
+		git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
+		cd libkqueue
+	fi
 	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
 	make -j$(($(getconf _NPROCESSORS_ONLN)+1))
 	make install
@@ -103,19 +109,32 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 	set -eu
 	cd /usr/src
 	# https://github.com/jimdigriz/freeradius-oauth2-perl#8021x-1
-#	git clone --single-branch --branch hostap_2_9 git://w1.fi/hostap.git
-	git clone --single-branch --branch tls13 https://gitlab.com/jimdigriz/hostap.git
-	cd hostap
+	if [ -d hostap ]; then
+		cd hostap
+		git reset --hard
+		git pull
+	else
+#		git clone --single-branch --branch hostap_2_9 git://w1.fi/hostap.git
+		git clone --single-branch --branch tls13 https://gitlab.com/jimdigriz/hostap.git
+		cd hostap
+	fi
 	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
 	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
-	ln -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
+	ln -f -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
 )
 (
 	set -eu
 	cd /usr/src
-#	git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
-	git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
-	cd freeradius-server
+	if [ -d freeradius-server ]; then
+		cd freeradius-server
+		quilt pop -a || true
+		git reset --hard
+		git pull
+	else
+#		git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
+		git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
+		cd freeradius-server
+	fi
 	# FR build is racey on Debian parallel builds :(
 	make deb
 	#fakeroot debian/rules debian/control
@@ -130,18 +149,18 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 
 	# make installation faster
 	mkdir -p /etc/freeradius/certs
-	ln raddb/certs/dh /etc/freeradius/certs/dh
+	ln -f -t /etc/freeradius/certs raddb/certs/dh
 
 	find /usr/src \
 			-maxdepth 1 -type f \
 			-regex '.*/\(freeradius_\|libfreeradius3_\|freeradius-\(common\|config\|utils\)\).*\.deb' \
 		| xargs -t apt-get -y install
 
-	mkdir /var/log/freeradius/tlscache
+	mkdir -p /var/log/freeradius/tlscache
 	chown root:freerad /var/log/freeradius/tlscache
 	chmod 770 /var/log/freeradius/tlscache
 
-	ln -s -t /opt/$VENDOR/$PROJECT /etc/freeradius/certs
+	ln -f -s -t /opt/$VENDOR/$PROJECT /etc/freeradius/certs
 )
 
 find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete

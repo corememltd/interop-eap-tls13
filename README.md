@@ -173,7 +173,23 @@ Additional information about the environment:
 
 ### Server/VM via-SSH
 
-...
+To deploy to a VM (or bare metal) server instead you need to prepare it to:
+
+ * so you can SSH into the server using SSH public key authentication (no password)
+ * you can run `sudo -s` non-interactively (again no password)
+
+If you have it configured correctly, you should be able to run the following and it will tell you are `root` without password:
+
+    $ ssh 192.0.2.100 sudo id
+    uid=0(root) gid=0(root) groups=0(root)
+
+Once ready, run the following
+
+    make deploy SSH_HOST=192.0.2.100 SSH_USER=username
+
+**N.B.** `SSH_HOST` is required and `SSH_USER` defaults to your username (provided via the environment variable `$USER`)
+
+**N.B.** it is safe to rerun the deploy against a VM server you have already deployed to
 
 ## Custom Build
 
