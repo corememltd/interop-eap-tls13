@@ -178,12 +178,12 @@ To deploy to a VM (or bare metal) server instead you first need to prepare it so
  * SSH into the server [using SSH public key authentication (no password) via an agent](https://www.cyberciti.biz/faq/how-to-use-ssh-agent-for-authentication-on-linux-unix/)
  * run `sudo -s` [without being prompted for your password](https://www.cyberciti.biz/faq/linux-unix-running-sudo-command-without-a-password/)
 
-If you have it configured correctly, you should be able to run the following and it will tell you are `root` without password:
+If you have it configured correctly, you should be able to run the following and it will tell you are `root` without prompting for your password:
 
     $ ssh 192.0.2.100 sudo id
     uid=0(root) gid=0(root) groups=0(root)
 
-Once ready, run the following
+Once ready, run the following:
 
     make deploy SSH_HOST=192.0.2.100 SSH_USER=username
 
