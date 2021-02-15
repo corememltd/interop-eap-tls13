@@ -173,10 +173,10 @@ Additional information about the environment:
 
 ### Server/VM via-SSH
 
-To deploy to a VM (or bare metal) server instead you need to prepare it to:
+To deploy to a VM (or bare metal) server instead you first need to prepare it so that you can:
 
- * so you can SSH into the server using SSH public key authentication (no password)
- * you can run `sudo -s` non-interactively (again no password)
+ * SSH into the server [using SSH public key authentication (no password) via an agent](https://www.cyberciti.biz/faq/how-to-use-ssh-agent-for-authentication-on-linux-unix/)
+ * run `sudo -s` [without being prompted for your password](https://www.cyberciti.biz/faq/linux-unix-running-sudo-command-without-a-password/)
 
 If you have it configured correctly, you should be able to run the following and it will tell you are `root` without password:
 
