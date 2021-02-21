@@ -6,7 +6,7 @@ PROJECT ?= interop-eap-tls13
 
 COMMITID = $(shell git rev-parse --short HEAD | tr -d '\n')$(shell git diff-files --quiet || printf -- -dirty)
 
-PACKER_VERSION = 1.6.6
+PACKER_VERSION = 1.7.0
 PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID)
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
