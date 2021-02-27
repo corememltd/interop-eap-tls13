@@ -3,7 +3,6 @@
 set -eux
 
 [ "${VENDOR:-}" -a "${PROJECT:-}" ] || { echo missing VENDOR/PROJECT environment variables; exit 1; }
-BRANCH=${BRANCH:-master}
 
 . /etc/environment
 export https_proxy http_proxy ftp_proxy
