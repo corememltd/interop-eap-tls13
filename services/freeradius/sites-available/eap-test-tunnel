@@ -2,6 +2,13 @@ server eap-test-inner {
 
 authorize {
 	filter_username
+
+	if (User-Name == "bob") {
+		update control {
+			Cleartext-Password := "bob"
+		}
+	}
+
 	mschap
 	suffix
 	update control {
