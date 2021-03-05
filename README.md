@@ -133,7 +133,7 @@ Newer operating systems (eg. Ubuntu 'focal' 20.04) globally disable use of anyth
 
 For this to work you will require [Wireshark](https://www.wireshark.org/) to be installed on your workstation, below details the walk-through from the Wireshark Wiki topic on [TLS Decryption](https://wiki.wireshark.org/TLS). When this process works you should be able to reconstruct similar screenshots to below (examples included before you try creating your own):
 
- * draft 14 (SSL close notify): using `tls13_send_zero = no`
+ * draft 14 (SSL close notify): using `tls13_send_zero = no` (currently not working as SSL alert `close_notify` is not sent)
      * [screenshot](./wireshark-examples/close-notify/screenshot.png)
      * [`dump.pcap`](./wireshark-examples/close-notify/dump.pcap)
      * [`sslkey.log`](./wireshark-examples/close-notify/sslkey.log)
