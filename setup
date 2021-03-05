@@ -64,7 +64,8 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	quilt \
 	samba-dev \
 	ssl-cert \
-	systemd-sysv
+	systemd-sysv \
+	tcpdump
 
 apt-get -y autoremove
 apt-get clean
@@ -170,5 +171,20 @@ if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then
 	invoke-rc.d freeradius start
 	invoke-rc.d freeradius reload
 fi
+
+(
+	set -eu
+	cd /usr/src
+	if [ -d wireshark-notes ]; then
+		cd wireshark-notes
+		git reset --hard
+		git pull
+	else
+		git clone https://git.lekensteyn.nl/peter/wireshark-notes.git
+		cd wireshark-notes
+	fi
+	make -C src
+	cp src/libsslkeylog.so /usr/local/lib/
+)
 
 exit 0

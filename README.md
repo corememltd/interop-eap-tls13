@@ -27,9 +27,14 @@ If you have [Docker](https://docker.com/) installed then you can run the followi
 
 **N.B.** to publish the RADIUS service to an alternative port you can export `PORT` (default: `1812`) before running `docker run ...`
 
+You can also open one or more terminals into the running environment using:
+
+    docker exec -it interop-eap-tls13 /bin/bash
+
 Some information about the environment:
 
  * login details for the container is `root` with no password
+ * there are no text editors on the system, to install one use `apt-get update && apt-get install ...`
  * shutdown the container by typing `halt` from within it or use `docker stop interop-eap-tls13`
  * your local workstation will have the following ports exposed:
      * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
@@ -67,6 +72,54 @@ To run FreeRADIUS in debugging mode, use the following:
     freeradius -X | tee /tmp/debug
 
 The debug output will be sent to both your terminal and logged to the file `/tmp/debug`.
+
+#### TLS Decoding
+
+For this to work you will require [Wireshark](https://www.wireshark.org/) to be installed on your workstation, below details the walk-through from the Wireshark Wiki topic on [TLS Decryption](https://wiki.wireshark.org/TLS). When this process works you should be able to reconstruct similar screenshots to below (examples included before you try creating your own):
+
+ * draft 14 (SSL close notify): using `tls13_send_zero = no`
+     * [screenshot](./wireshark-examples/close-notify/screenshot.png)
+     * [`dump.pcap`](./wireshark-examples/close-notify/dump.pcap)
+     * [`sslkey.log`](./wireshark-examples/close-notify/sslkey.log)
+ * draft 13 (commitment message): using `tls13_send_zero = yes`
+     * [screenshot](./wireshark-examples/commitment-message/screenshot.png)
+     * [`dump.pcap`](./wireshark-examples/commitment-message/dump.pcap)
+     * [`sslkey.log`](./wireshark-examples/commitment-message/sslkey.log)
+
+**N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
+
+Inside the container, run in one terminal `tcpdump` set to capture all RADIUS authentication traffic:
+
+    tcpdump -n -p -i any -w - -U port 1812 | tee /tmp/dump.pcap | tcpdump -n -v -r -
+
+**N.B.** alternatively you run this step on the host end against the `docker0` network interface
+
+Next is to use the included [`libsslkeylog.so` library](https://git.lekensteyn.nl/peter/wireshark-notes/) to capture all the SSL keying material necessary to let us later decode the traffic offline in Wireshark. This is done by running the following in another console terminal:
+
+    systemctl stop freeradius
+    env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log freeradius -X | tee /tmp/debug
+
+**N.B.** you should delete `/tmp/sslkey.log` between subsequent runs
+
+Now run some authentication requests with `eapol_test` in yet another console terminal as shown earlier. Once complete, terminate (using `Ctrl-C`) the FreeRADIUS and copy `/tmp/dump.pcap` and `/tmp/sslkey.log` to your host system where you will be running Wireshark, you can do this by running from the host end:
+
+    docker cp interop-eap-tls13:/tmp/dump.pcap .
+    docker cp interop-eap-tls13:/tmp/sslkey.log .
+
+On your host:
+
+ 1. open the 'Edit' menu and select 'Preferences'
+ 1. open 'Protocols' and select 'SSL' from the list
+     * add '(Pre)-Master-Secret log' by browsing and selecting `sslkey.log`
+     * click on 'OK'
+ 1. close the preferences window
+ 1. open `dump.pcap` in Wireshark
+
+##### SSL Key Logging from `eapol_test`
+
+Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary, you can capture the keying material from the client end instead with:
+
+    env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
 
 ### TLS Certificates
 
