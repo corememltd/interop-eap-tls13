@@ -114,7 +114,7 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git reset --hard
 		git pull
 	else
-		git clone --single-branch --branch master git://w1.fi/hostap.git
+		git clone --single-branch --branch master https://w1.fi/hostap.git
 		cd hostap
 	fi
 	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
