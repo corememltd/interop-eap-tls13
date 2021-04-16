@@ -1,0 +1,14 @@
+[Unit]
+Description=NetworkRADIUS Interop EAP-TLSv1.3 dot1x Tunnel Service
+Wants=network-online.target
+After=network-online.target
+Requisite=hostapd.service
+Before=hostapd.service
+
+[Service]
+ExecStartPre=/bin/sh /opt/networkradius/interop-eap-tls13/services/dot1x-tunnel.sh start
+ExecStart=/usr/sbin/udhcpd -f /etc/udhcpd.conf
+ExecStop=/bin/sh /opt/networkradius/interop-eap-tls13/services/dot1x-tunnel.sh stop
+
+[Install]
+WantedBy=multi-user.target

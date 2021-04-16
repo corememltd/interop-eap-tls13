@@ -16,6 +16,13 @@ export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+		--option=Dpkg::options::=--force-unsafe-io install --no-install-recommends \
+	eatmydata
+
+export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libeatmydata.so
+
+#apt-get update
+apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
 		--option=Dpkg::options::=--force-unsafe-io --no-install-recommends upgrade
 apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
 		--option=Dpkg::options::=--force-unsafe-io install --no-install-recommends \
@@ -25,11 +32,15 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	ca-certificates \
 	cmake \
 	curl \
+	dbus \
 	debhelper \
 	default-libmysqlclient-dev \
 	dh-systemd \
 	fakeroot \
 	git \
+	hostapd \
+	iproute2 \
+	nftables \
 	libcap-dev \
 	libcurl4-openssl-dev \
 	libdbus-1-dev \
@@ -65,7 +76,8 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	samba-dev \
 	ssl-cert \
 	systemd-sysv \
-	tcpdump
+	tcpdump \
+	udhcpd
 
 apt-get -y autoremove
 apt-get clean
@@ -117,6 +129,7 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git clone --single-branch --branch master https://w1.fi/hostap.git
 		cd hostap
 	fi
+
 	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
 	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
 	ln -f -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
@@ -186,5 +199,20 @@ fi
 	make -C src
 	cp src/libsslkeylog.so /usr/local/lib/
 )
+
+ln -f -s /opt/$VENDOR/$PROJECT/services/nftables.conf /etc/nftables.conf
+systemctl enable nftables.service
+
+ln -f -s /opt/$VENDOR/$PROJECT/services/udhcpd.conf /etc/udhcpd.conf
+
+find /opt/$VENDOR/$PROJECT/services/systemd -type f | xargs ln -f -s -t /lib/systemd/system
+ls /opt/$VENDOR/$PROJECT/services/systemd | xargs systemctl enable
+
+ln -f -s /opt/$VENDOR/$PROJECT/services/hostapd.conf /etc/hostapd/hostapd.conf
+systemctl unmask hostapd.service
+systemctl enable hostapd.service
+
+unset LD_PRELOAD
+sync
 
 exit 0

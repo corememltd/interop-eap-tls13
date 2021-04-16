@@ -17,6 +17,7 @@ If you have [Docker](https://docker.com/) installed then you can run the followi
       --name interop-eap-tls13 \
       -e container=docker \
       --publish=${PORT:-1812}:1812/udp --publish=${PORT:-1812}:1812/tcp \
+      --publish=${L2TP:-1701}:1701/udp \
       --tmpfs /run \
       -v /sys/fs/cgroup:/sys/fs/cgroup:ro \
       --ulimit memlock=$((128 * 1024)) \
@@ -39,6 +40,14 @@ Some information about the environment:
  * your local workstation will have the following ports exposed:
      * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
          * globally listens and accepts any client using the shared secret `testing123`
+     * **`[L2TP]/udp` (default: `L2TP=1701`):** L2TP
+         * useful for testing wired 802.1X from a VM that supports L2TP backed Ethernet interfaces such as QEMU
+         * UDP source port can be anything
+         * requires the local/peer tunnel ID set to `1` and the session ID (both RX and TX) to `0xffffffff` (`4294967295`)
+         * make sure the guest is configured for an MTU of 1446 bytes
+             * Linux: `ip link set dev eth1 mtu 1446`
+             * Microsoft Windows 10: `netsh interface ipv4 set subinterface "Ethernet 2" mtu=1446 store=persistent`
+         * [QEMU example](https://qemu-project.gitlab.io/qemu/system/invocation.html) (change *only* `src` and `dst`): `-netdev l2tpv3,id=eth1,src=192.0.2.1,dst=192.0.2.2,udp,srcport=0,dstport=1701,txsession=0xffffffff,counter -device virtio-net-pci,netdev=eth1`
 
 # Usage
 
@@ -84,6 +93,8 @@ If you are using Docker, use:
 If you are using a server, try:
 
     rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
+
+From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should b able to validate the hostname CN against `Example Server Certificate`.
 
 ### TLS Configuration
 
@@ -176,6 +187,18 @@ On your host:
 Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary, you can capture the keying material from the client end instead with:
 
     env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
+
+### Microsoft Windows 10
+
+If you have QEMU (tested with version 5.2.0) and Windows Insider (Dev Channel, tested with build 21354) you can use the enclosed script:
+
+    env ISO=Windows10_InsiderPreview_Client_x64_en-gb_21354.iso sh -x qemu-win10.sh
+
+Connect to the VM using the [Spice client](https://www.spice-space.org/):
+
+    spicy -h 127.0.0.1 -p 5930
+
+The script will also fetch the [virtio-win drivers](https://github.com/virtio-win/virtio-win-pkg-scripts) and add a CD mount in the VM so drivers are available for the VirtIO devices as well as the including the Spice guest agent.
 
 # Development
 

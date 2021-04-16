@@ -6,14 +6,19 @@ PROJECT ?= interop-eap-tls13
 
 COMMITID = $(shell git rev-parse --short HEAD | tr -d '\n')$(shell git diff-files --quiet || printf -- -dirty)
 
-PACKER_VERSION = 1.7.0
+PACKER_VERSION = 1.7.2
 PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID)
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
+ifneq ($(KERNEL),darwin)
 ifeq ($(shell uname -m),x86_64)
 MACHINE = amd64
 else
 MACHINE = 386
+endif
+else
+# arm64 not yet supported but macOS provides a translation layer
+MACHINE = amd64
 endif
 
 CLEAN =
@@ -44,6 +49,7 @@ endif
 .PHONY: dev
 ifneq ($(shell docker version 2>&-),)
 dev: PORT ?= 1812
+dev: L2TP_PORT ?= 1701
 dev: .stamp.docker
 	-docker run -it --rm \
 		--name $(PROJECT) \
@@ -51,6 +57,7 @@ dev: .stamp.docker
 		-v $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro \
 		-v $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro \
 		--publish=$(PORT):1812/udp --publish=$(PORT):1812/tcp \
+		--publish=$(L2TP_PORT):1701/udp --publish=$(L2TP_PORT):1701/tcp \
 		--tmpfs /run \
 		-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
 		--ulimit memlock=$$((128 * 1024)) \
