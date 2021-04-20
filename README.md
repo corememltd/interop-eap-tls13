@@ -41,7 +41,7 @@ Some information about the environment:
      * **`[PORT]/{udp,tcp}` (default: `PORT=1812`):** RADIUS authentication
          * globally listens and accepts any client using the shared secret `testing123`
      * **`[L2TP]/udp` (default: `L2TP=1701`):** L2TP
-         * useful for testing wired 802.1X from a VM that supports L2TP backed Ethernet interfaces such as QEMU
+         * useful for testing wired 802.1X from a VM that supports L2TP backed Ethernet interfaces such as QEMU; `hostapd` runs as the authenticator and a DHCP server runs on the interface so an IP can be assigned (no default gateway)
          * UDP source port can be anything
          * requires the local/peer tunnel ID set to `1` and the session ID (both RX and TX) to `0xffffffff` (`4294967295`)
          * make sure the guest is configured for an MTU of 1446 bytes
