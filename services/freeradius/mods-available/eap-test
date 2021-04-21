@@ -2,7 +2,7 @@
 ##
 ##  eap.conf -- Configuration for EAP types (PEAP, TTLS, etc.)
 ##
-##	$Id: 9d015f88956b334021e8439a12e81079db822f65 $
+##	$Id: 49eb9100014ef8883a9b1fa0110409032a61c5cd $
 
 #######################################################################
 #
@@ -84,13 +84,13 @@ eap eap-test {
 	#  EAP-pwd -- secure password-based authentication
 	#
 	pwd {
-	#	group = 19
+		group = 19
 
 		server_id = theserver@example.com
 
 		#  This has the same meaning as for TLS.
 		#
-	#	fragment_size = 1020
+		fragment_size = 1020
 
 		# The virtual server which determines the
 		# "known good" password for the user.
@@ -99,7 +99,7 @@ eap eap-test {
 		# distinguished by having a User-Name, but
 		# no User-Password, CHAP-Password, EAP-Message, etc.
 		#
-	#	virtual_server = "eap-test-inner"
+		virtual_server = "eap-test-inner"
 	}
 
 
@@ -418,16 +418,32 @@ eap eap-test {
 		#
 		#  Allowed values are "1.0", "1.1", "1.2", and "1.3".
 		#
+		#  As of 2021, it is STRONGLY RECOMMENDED to set
+		#
+		#	tls_min_version = "1.0"
+		#
+		#  Older TLS versions are insecure and deprecated.
+		#
 		#  The values must be in quotes.
 		#
 		tls13_enable = yes
-		tls13_send_zero = yes
 		tls_min_version = "1.0"
 		tls_max_version = "1.3"
 
 		#  Elliptical cryptography configuration
 		#
-		#  Only for OpenSSL >= 0.9.8.f
+		#  This configuration should be one of the following:
+		#
+		#  * a name of the curve to use, e.g. "prime256v1".
+		#
+		#  * a colon separated list of curve NIDs or names.
+		#
+		#  * an empty string, in which case OpenSSL will choose
+		#    the "best" curve for the situation.
+		#
+		#  For supported curve names, please run
+		#
+		#	openssl ecparam -list_curves
 		#
 		ecdh_curve = "prime256v1"
 
@@ -489,7 +505,7 @@ eap eap-test {
 			#
 			#    Allow-Session-Resumption = No
 			#
-			#  If "enable = no" below, you CANNOT enable resumption for just one
+			#  If "enable = yes" below, you CANNOT enable resumption for just one
 			#  user by setting the above attribute to "yes".
 			#
 			enable = yes
@@ -606,60 +622,60 @@ eap eap-test {
 		#  revoke certificates without the distribution of
 		#  new Certificate Revocation Lists (CRLs).
 		#
-		ocsp {
-			#  Enable it.  The default is "no".
-			#  Deleting the entire "ocsp" subsection
-			#  also disables ocsp checking
-			#
-			enable = no
-
-			#  The OCSP Responder URL can be automatically
-			#  extracted from the certificate in question.
-			#  To override the OCSP Responder URL set
-			#  "override_cert_url = yes".
-			#
-			override_cert_url = yes
-
-			#  If the OCSP Responder address is not extracted from
-			#  the certificate, the URL can be defined here.
-			#
-			url = "http://127.0.0.1/ocsp/"
-
-			# If the OCSP Responder can not cope with nonce
-			# in the request, then it can be disabled here.
-			#
-			# For security reasons, disabling this option
-			# is not recommended as nonce protects against
-			# replay attacks.
-			#
-			# Note that Microsoft AD Certificate Services OCSP
-			# Responder does not enable nonce by default. It is
-			# more secure to enable nonce on the responder than
-			# to disable it in the query here.
-			# See http://technet.microsoft.com/en-us/library/cc770413%28WS.10%29.aspx
-			#
-		#	use_nonce = yes
-
-			# Number of seconds before giving up waiting
-			# for OCSP response. 0 uses system default.
-			#
-		#	timeout = 0
-
-			# Normally an error in querying the OCSP
-			# responder (no response from server, server did
-			# not understand the request, etc) will result in
-			# a validation failure.
-			#
-			# To treat these errors as 'soft' failures and
-			# still accept the certificate, enable this
-			# option.
-			#
-			# Warning: this may enable clients with revoked
-			# certificates to connect if the OCSP responder
-			# is not available. Use with caution.
-			#
-		#	softfail = no
-		}
+#		ocsp {
+#			#  Enable it.  The default is "no".
+#			#  Deleting the entire "ocsp" subsection
+#			#  also disables ocsp checking
+#			#
+#			enable = yes
+#
+#			#  The OCSP Responder URL can be automatically
+#			#  extracted from the certificate in question.
+#			#  To override the OCSP Responder URL set
+#			#  "override_cert_url = yes".
+#			#
+#			override_cert_url = yes
+#
+#			#  If the OCSP Responder address is not extracted from
+#			#  the certificate, the URL can be defined here.
+#			#
+#			url = "http://127.0.0.1/ocsp/"
+#
+#			# If the OCSP Responder can not cope with nonce
+#			# in the request, then it can be disabled here.
+#			#
+#			# For security reasons, disabling this option
+#			# is not recommended as nonce protects against
+#			# replay attacks.
+#			#
+#			# Note that Microsoft AD Certificate Services OCSP
+#			# Responder does not enable nonce by default. It is
+#			# more secure to enable nonce on the responder than
+#			# to disable it in the query here.
+#			# See http://technet.microsoft.com/en-us/library/cc770413%28WS.10%29.aspx
+#			#
+#		#	use_nonce = yes
+#
+#			# Number of seconds before giving up waiting
+#			# for OCSP response. 0 uses system default.
+#			#
+#		#	timeout = 0
+#
+#			# Normally an error in querying the OCSP
+#			# responder (no response from server, server did
+#			# not understand the request, etc) will result in
+#			# a validation failure.
+#			#
+#			# To treat these errors as 'soft' failures and
+#			# still accept the certificate, enable this
+#			# option.
+#			#
+#			# Warning: this may enable clients with revoked
+#			# certificates to connect if the OCSP responder
+#			# is not available. Use with caution.
+#			#
+#		#	softfail = no
+#		}
 	}
 
 

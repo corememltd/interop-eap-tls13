@@ -144,7 +144,7 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git pull
 	else
 #		git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
-		git clone --single-branch --branch tls-misc https://github.com/jimdigriz/freeradius-server.git
+		git clone --single-branch --branch eapol-tests https://github.com/jimdigriz/freeradius-server.git
 		cd freeradius-server
 	fi
 	# FR build is racey on Debian parallel builds :(
