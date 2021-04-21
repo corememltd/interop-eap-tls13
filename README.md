@@ -5,6 +5,8 @@ This project supports both building and running a [Docker](https://docker.com/) 
 ## Related Links
 
  * [Using EAP-TLS with TLS 1.3 (draft-ietf-emu-eap-tls13)](https://datatracker.ietf.org/doc/draft-ietf-emu-eap-tls13/)
+     * The current (revision 14 at time of writing) EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4)
+     * FreeRADIUS, Microsoft Windows 10 and hostapd all only implement the Commitment Message (pre-rev14) draft
  * [TLS-based EAP types and TLS 1.3 (draft-ietf-emu-tls-eap-types)](https://datatracker.ietf.org/doc/draft-ietf-emu-tls-eap-types/)
 
 # Quick Start with Docker
@@ -97,22 +99,6 @@ If you are using a server, try:
 From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should b able to validate the hostname CN against `Example Server Certificate`.
 
 ### TLS Configuration
-
-#### Using TLS Close Notify or Commitment Message
-
-The current (revision 14 at time of writing) EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4).
-
-Though FreeRADIUS defaults to using TLS Close Notify this project configures the Commitment Message code path as the patches to [`hostap`/`wpa_supplicant`/`eapol_test`](https://w1.fi/) support only this.
-
-To toggle FreeRADIUS to use TLS Close Notify, edit `services/freeradius/mods-available/eap-test` to reflect in the `tls-config` section:
-
-    tls13_send_zero = no
-
-Now restart FreeRADIUS in the usual manner using:
-
-    systemctl restart freeradius
-
-**N.B.** remember by doing this `eapol_test` will no longer work
 
 #### Version
 
