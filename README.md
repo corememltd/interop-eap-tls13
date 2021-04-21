@@ -96,7 +96,7 @@ If you are using a server, try:
 
     rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
 
-From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should b able to validate the hostname CN against `Example Server Certificate`.
+From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` (password '`whatever`') onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should b able to validate the hostname CN against `Example Server Certificate`.
 
 ### TLS Configuration
 
