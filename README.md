@@ -119,7 +119,7 @@ Newer operating systems (eg. Debian 'buster' 10, Ubuntu 'focal' 20.04, ...) glob
 
 For this to work you will require [Wireshark](https://www.wireshark.org/) to be installed on your workstation, below details the walk-through from the Wireshark Wiki topic on [TLS Decryption](https://wiki.wireshark.org/TLS). When this process works you should be able to reconstruct similar screenshots to below (examples included before you try creating your own):
 
- * draft 13 (commitment message): using `tls13_send_zero = yes`
+ * draft 13 (commitment message):
      * [screenshot](./wireshark-examples/screenshot.png)
      * [`dump.pcap`](./wireshark-examples/dump.pcap)
      * [`sslkey.log`](./wireshark-examples/sslkey.log)
