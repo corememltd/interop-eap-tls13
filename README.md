@@ -111,20 +111,9 @@ If you want to force FreeRADIUS to *only* accept something later than TLSv1.0 yo
 
 ##### OpenSSL
 
-Newer operating systems (eg. Ubuntu 'focal' 20.04) globally disable use of anything earlier than TLSv1.2 which can be re-enabled by editing `/etc/ssl/openssl.cnf` and have it top and tailed with:
+Newer operating systems (eg. Debian 'buster' 10, Ubuntu 'focal' 20.04, ...) globally disable use of anything earlier than TLSv1.2 via `/etc/ssl/openssl.cnf` which can be re-enabled when needed by editing the configuration files in the `eapol_test` directory and uncommenting the following line:
 
-    openssl_conf = default_conf
-    
-    <<<existing contents of openssl.cnf>>>
-    
-    [default_conf]
-    ssl_conf = ssl_sect
-    
-    [ssl_sect]
-    system_default = system_default_sect
-    
-    [system_default_sect]
-    CipherString = DEFAULT@SECLEVEL=1
+    openssl_ciphers="DEFAULT@SECLEVEL=1"
 
 #### TLS Decoding
 
