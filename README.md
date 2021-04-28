@@ -175,6 +175,11 @@ Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
 The script will also fetch the [virtio-win drivers](https://github.com/virtio-win/virtio-win-pkg-scripts) and add a CD mount in the VM so drivers are available for the VirtIO devices as well as the including the Spice guest agent.
 
+From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.html), you can type the following to toggle the network link state:
+
+    set_link eth1 off
+    set_link eth1 on
+
 # Development
 
 If you wish to build the project locally, the rest of this document describes that process.
