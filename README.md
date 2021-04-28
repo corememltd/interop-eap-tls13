@@ -119,14 +119,10 @@ Newer operating systems (eg. Debian 'buster' 10, Ubuntu 'focal' 20.04, ...) glob
 
 For this to work you will require [Wireshark](https://www.wireshark.org/) to be installed on your workstation, below details the walk-through from the Wireshark Wiki topic on [TLS Decryption](https://wiki.wireshark.org/TLS). When this process works you should be able to reconstruct similar screenshots to below (examples included before you try creating your own):
 
- * draft 14 (SSL close notify): using `tls13_send_zero = no` (currently not working as SSL alert `close_notify` is not sent)
-     * [screenshot](./wireshark-examples/close-notify/screenshot.png)
-     * [`dump.pcap`](./wireshark-examples/close-notify/dump.pcap)
-     * [`sslkey.log`](./wireshark-examples/close-notify/sslkey.log)
  * draft 13 (commitment message): using `tls13_send_zero = yes`
-     * [screenshot](./wireshark-examples/commitment-message/screenshot.png)
-     * [`dump.pcap`](./wireshark-examples/commitment-message/dump.pcap)
-     * [`sslkey.log`](./wireshark-examples/commitment-message/sslkey.log)
+     * [screenshot](./wireshark-examples/screenshot.png)
+     * [`dump.pcap`](./wireshark-examples/dump.pcap)
+     * [`sslkey.log`](./wireshark-examples/sslkey.log)
 
 **N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
 
