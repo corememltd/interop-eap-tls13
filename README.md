@@ -64,6 +64,8 @@ The project comes with a number of `eapol_test` configuration files for you to u
     cd /opt/networkradius/interop-eap-tls13
     eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
 
+**N.B.** add `-r 1` as a argument to `eapol_test` to test resumption
+
 The tests in the `eapol_test` directory are named after the EAP methods they use and the suite covers:
 
  * EAP-TLS
