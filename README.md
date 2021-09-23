@@ -6,7 +6,7 @@ This project supports both building and running a [Docker](https://docker.com/) 
 
  * [Using EAP-TLS with TLS 1.3 (draft-ietf-emu-eap-tls13)](https://datatracker.ietf.org/doc/draft-ietf-emu-eap-tls13/)
      * The current (revision 14 at time of writing) EAP-TLSv1.3 draft uses [TLS Close Notify](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-14#section-2.1.4) to signal the end of the handshake whilst earlier drafts used a [Commitment Message](https://tools.ietf.org/html/draft-ietf-emu-eap-tls13-13#section-2.1.4)
-     * FreeRADIUS, Microsoft Windows 10 and hostapd all only implement the Commitment Message (pre-rev14) draft
+     * FreeRADIUS, Microsoft Windows 11 and hostapd all only implement the Commitment Message (pre-rev14) draft
  * [TLS-based EAP types and TLS 1.3 (draft-ietf-emu-tls-eap-types)](https://datatracker.ietf.org/doc/draft-ietf-emu-tls-eap-types/)
 
 # Quick Start with Docker
@@ -48,7 +48,7 @@ Some information about the environment:
          * requires the local/peer tunnel ID set to `1` and the session ID (both RX and TX) to `0xffffffff` (`4294967295`)
          * make sure the guest is configured for an MTU of 1446 bytes
              * Linux: `ip link set dev eth1 mtu 1446`
-             * Microsoft Windows 10: `netsh interface ipv4 set subinterface "Ethernet 2" mtu=1446 store=persistent`
+             * Microsoft Windows 11: `netsh interface ipv4 set subinterface "Ethernet 2" mtu=1446 store=persistent`
          * [QEMU example](https://qemu-project.gitlab.io/qemu/system/invocation.html) (change *only* `src` and `dst`): `-netdev l2tpv3,id=eth1,src=192.0.2.1,dst=192.0.2.2,udp,srcport=0,dstport=1701,txsession=0xffffffff,counter -device virtio-net-pci,netdev=eth1`
 
 # Usage
@@ -161,11 +161,11 @@ Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary,
 
     env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
 
-### Microsoft Windows 10
+### Microsoft Windows 11
 
-If you have QEMU (tested with version 5.2.0) and Windows Insider (Dev Channel, tested with build 21354) you can use the enclosed script:
+If you have QEMU (tested with version 5.2.0) and Windows 11 Insider Preview (Dev Channel, tested with build 22454) you can use the enclosed script:
 
-    env ISO=Windows10_InsiderPreview_Client_x64_en-gb_21354.iso sh -x qemu-win10.sh
+    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22454.iso sh -x qemu-win10.sh
 
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
@@ -177,6 +177,12 @@ From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.htm
 
     set_link eth1 off
     set_link eth1 on
+
+**N.B.** if you use `tcpdump` on the `dot1x` interface inside the container, do *not* use promiscuous mode (without `-p`) otherwise you may need to toggle back on promiscuous mode with `ip link set dev dot1x promisc on`
+
+#### EAP-TTLS and PEAP
+
+If you have contacts on the Microsoft EAP team, they might be able to provide access to `EnableFeatureTool.exe` which you can use to enable these methods.
 
 # Development
 
