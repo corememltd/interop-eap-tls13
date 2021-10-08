@@ -6,8 +6,11 @@ PROJECT ?= interop-eap-tls13
 
 COMMITID = $(shell git rev-parse --short HEAD | tr -d '\n')$(shell git diff-files --quiet || printf -- -dirty)
 
+BRANCH ?= v3.0.x
+TAG ?= release_3_0_25
+
 PACKER_VERSION = 1.7.2
-PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID)
+PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID) -var branch=$(BRANCH) -var tag=$(TAG)
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
 ifneq ($(KERNEL),darwin)

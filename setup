@@ -4,6 +4,9 @@ set -eux
 
 [ "${VENDOR:-}" -a "${PROJECT:-}" ] || { echo missing VENDOR/PROJECT environment variables; exit 1; }
 
+: ${BRANCH:=v3.0.x}
+: ${TAG:=v3.0.x}
+
 . /etc/environment
 export https_proxy http_proxy ftp_proxy
 
@@ -35,7 +38,7 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	dbus \
 	debhelper \
 	default-libmysqlclient-dev \
-	dh-systemd \
+	systemd \
 	fakeroot \
 	git \
 	hostapd \
@@ -143,8 +146,9 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git reset --hard
 		git pull
 	else
-		git clone --single-branch --branch v3.0.x https://github.com/FreeRADIUS/freeradius-server.git
+		git clone --single-branch --branch $BRANCH https://github.com/FreeRADIUS/freeradius-server.git
 		cd freeradius-server
+		git checkout $TAG
 	fi
 	# FR build is racey on Debian parallel builds :(
 	make deb
@@ -174,9 +178,9 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 
 find /etc/freeradius/mods-enabled /etc/freeradius/sites-enabled -type f,l -delete
 find /etc/freeradius/sites-enabled -type f,l -delete
-find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f          | xargs -r -t ln -f -s -t /etc/freeradius/policy.d
-find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l  | xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
-find /opt/$VENDOR/$PROJECT/services/freeradius/sites-available -type f,l | xargs -r -t ln -f -s -t /etc/freeradius/sites-enabled
+find /opt/$VENDOR/$PROJECT/services/freeradius/policy.d -type f			| xargs -r -t ln -f -s -t /etc/freeradius/policy.d
+find /opt/$VENDOR/$PROJECT/services/freeradius/mods-available -type f,l		| xargs -r -t ln -f -s -t /etc/freeradius/mods-enabled
+find /opt/$VENDOR/$PROJECT/services/freeradius/sites-available -type f,l	| xargs -r -t ln -f -s -t /etc/freeradius/sites-enabled
 
 freeradius -C || freeradius -XC
 if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then

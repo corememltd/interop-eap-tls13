@@ -62,9 +62,11 @@
     {
       "environment_vars": [
         "VENDOR={{ user `vendor` }}",
-        "PROJECT={{ user `project` }}"
+        "PROJECT={{ user `project` }}",
+        "BRANCH={{ user `branch` }}",
+        "TAG={{ user `tag` }}"
       ],
-      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:+$SUDO --preserve-env=PACKER_BUILDER_TYPE,VENDOR,PROJECT} /bin/sh -eux '{{ .Path }}'",
+      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:+$SUDO --preserve-env=PACKER_BUILDER_TYPE,VENDOR,PROJECT,BRANCH,TAG} /bin/sh -eux '{{ .Path }}'",
       "script": "setup",
       "type": "shell"
     },
@@ -80,7 +82,7 @@
   "variables": {
     "family": "{{ user `vendor`}}-{{ user `project` }}",
     "name": "{{ user `commit` }}",
-    "from": "debian:buster-slim",
+    "from": "debian:bullseye-slim",
     "ssh_host": "192.0.2.100",
     "ssh_user": "{{ env `USER` }}"
   }

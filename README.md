@@ -1,6 +1,6 @@
 Interoperability testing tools for [EAP-TLSv1.3](https://datatracker.ietf.org/doc/draft-ietf-emu-eap-tls13/) and corresponding [EAP types](https://datatracker.ietf.org/doc/draft-ietf-emu-tls-eap-types/).
 
-This project supports both building and running a [Docker](https://docker.com/) container for development purposes as well as deployment over SSH to a [Debian 'buster' 10](https://debian.org/) (or [Ubuntu 'focal' 20.04](https://ubuntu.com/)) system.
+This project supports both building and running a [Docker](https://docker.com/) container for development purposes as well as deployment over SSH to a [Debian 'bullseye' 11](https://debian.org/) (or [Ubuntu 'focal' 20.04](https://ubuntu.com/)) system.
 
 ## Related Links
 
@@ -215,13 +215,15 @@ Check out a copy of the project:
 
 Similar to the [quick start instructions](#quick-start-with-docker), but the following will instead build and launch the Docker image from scratch:
 
-    make dev PORT=1812 FROM=debian:buster-slim
+    make dev PORT=1812 FROM=debian:bullseye-slim BRANCH=v3.0.x TAG=release_3_0_25
 
 Where the configuration values are described as:
 
  * **`PORT` (default: `1812`):** sets the port number that RADIUS authentication is exposed on your workstation
- * **`FROM` (default: [`debian:buster-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
+ * **`FROM` (default: [`debian:bullseye-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
      * [`ubuntu:focal`](https://hub.docker.com/_/ubuntu/) is also known to work
+ * **`BRANCH` (default: `v3.0.x`):** sets the branch of FreeRADIUS to use
+ * **`TAG` (default: `release_3_0_25`):** sets the tag of FreeRADIUS to use
 
 Additional information about the environment:
 
