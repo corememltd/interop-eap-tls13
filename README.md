@@ -72,6 +72,8 @@ The tests in the `eapol_test` directory are named after the EAP methods they use
  * EAP-TTLS/{PAP,MSCHAPv2,EAP-MSCHAPv2,EAP-TLS}
  * PEAP/{MSCHAPv2,EAP-TLS,EAP-TLS+MSCHAPv2}
 
+**N.B.** if you are using your own supplicant, for the username/password flows the credentials are `bob`/`bob`
+
 You can also run the EAP-TLS unit tests which utilise `eapol_test` that come with FreeRADIUS:
 
     cd /usr/src/freeradius-server
