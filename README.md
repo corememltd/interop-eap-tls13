@@ -165,7 +165,7 @@ Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary,
 
 If you have QEMU (tested with version 5.2.0) and Windows 11 Insider Preview (Dev Channel, tested with build 22454) you can use the enclosed script:
 
-    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22454.iso sh -x qemu-win10.sh
+    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22454.iso sh -x qemu-win11.sh
 
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
