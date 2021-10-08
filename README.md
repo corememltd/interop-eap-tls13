@@ -169,6 +169,8 @@ If you have QEMU (tested with version 5.2.0) and Windows 11 Insider Preview (Dev
 
     env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22454.iso sh -x qemu-win11.sh
 
+**N.B.** [later versions of Windows 11 are currently not supported](https://gitlab.com/coremem/networkradius/interop-eap-tls13/-/issues/1)
+
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
     spicy -h 127.0.0.1 -p 5930
