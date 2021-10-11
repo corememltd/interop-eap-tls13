@@ -62,7 +62,8 @@ dev: .stamp.docker
 		--publish=$(PORT):1812/udp --publish=$(PORT):1812/tcp \
 		--publish=$(L2TP_PORT):1701/udp --publish=$(L2TP_PORT):1701/tcp \
 		--tmpfs /run \
-		-v /sys/fs/cgroup:/sys/fs/cgroup:ro \
+		--cgroupns=host \
+		-v /sys/fs/cgroup:/sys/fs/cgroup:rw \
 		--ulimit memlock=$$((128 * 1024)) \
 		--security-opt apparmor=unconfined \
 		--cap-add SYS_ADMIN --cap-add NET_ADMIN --cap-add SYS_PTRACE \
