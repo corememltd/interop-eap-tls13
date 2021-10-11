@@ -178,6 +178,10 @@ Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
 The script will also fetch the [virtio-win drivers](https://github.com/virtio-win/virtio-win-pkg-scripts) and add a CD mount in the VM so drivers are available for the VirtIO devices as well as the including the Spice guest agent.
 
+**N.B.** when you configure the network interface, make sure you use the old 'Control Panel' interface as it will reflect your 802.1X configuration correctly
+
+**N.B.** due to a (known to MS) bug in wired 802.1X, if you see no traffic going to the RADIUS server, use the old 'Control Panel' interface to 'Disable' and re-enable the interface to clear it out from a latched/wedged state
+
 From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.html), you can type the following to toggle the network link state:
 
     set_link eth1 off
