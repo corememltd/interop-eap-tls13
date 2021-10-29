@@ -9,7 +9,7 @@ COMMITID = $(shell git rev-parse --short HEAD | tr -d '\n')$(shell git diff-file
 BRANCH ?= v3.0.x
 TAG ?= release_3_0_25
 
-PACKER_VERSION = 1.7.2
+PACKER_VERSION = 1.7.8
 PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID) -var branch=$(BRANCH) -var tag=$(TAG)
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
@@ -76,7 +76,7 @@ endif
 ifneq ($(FROM),)
 .stamp.docker: PACKER_BUILD_FLAGS += -var from=$(FROM)
 endif
-.stamp.docker: packer.json .stamp.packer setup
+.stamp.docker: setup.json .stamp.packer setup
 	env TMPDIR=$(CURDIR) ./packer build -on-error=ask -only docker $(PACKER_BUILD_FLAGS) $<
 	touch $@
 CLEAN += .stamp.docker
@@ -92,7 +92,7 @@ endif
 ifneq ($(SSH_USER),)
 deploy: PACKER_BUILD_FLAGS += -var ssh_user=$(SSH_USER)
 endif
-deploy: packer.json .stamp.packer
+deploy: setup.json .stamp.packer
 ifeq ($(SSH_HOST),)
 	@{ echo you need Docker to be installed to start a dev environment >&2; exit 1; }
 endif
@@ -104,9 +104,9 @@ DISTCLEAN += $(wildcard packer_*.zip)
 
 packer: packer_$(PACKER_VERSION)_$(KERNEL)_$(MACHINE).zip
 	unzip -oDD $< $@
-DISTCLEAN += packer
+CLEAN += packer
 
-.stamp.packer: packer.json packer
+.stamp.packer: setup.json packer
 	./packer validate $(PACKER_BUILD_FLAGS) $<
 	@touch $@
 CLEAN += .stamp.packer

@@ -3,7 +3,7 @@
 set -eu
 
 DISK=${DISK:-hda.qcow2}
-[ -f "$DISK" ] || qemu-img create -f qcow2 "$DISK" 40G
+[ -f "$DISK" ] || qemu-img create -f qcow2 "$DISK" 64G
 
 [ -f virtio-win.iso ] || curl -O -J -L -f --compressed https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso
 
@@ -31,7 +31,10 @@ exec qemu-system-x86_64 \
 	-boot order=c${ISO:+,once=d} \
 	-device qemu-xhci \
 	-device usb-tablet -device usb-kbd \
-	-rtc base=localtime,clock=host \
+	-rtc base=localtime \
 	-netdev user,id=eth0 -device virtio-net-pci,netdev=eth0 \
 	-netdev l2tpv3,id=eth1,src=127.0.0.1,dst=127.0.0.1,udp,srcport=0,dstport=1701,txsession=0xffffffff,rxsession=0xffffffff,counter -device virtio-net-pci,netdev=eth1 \
+	-drive if=pflash,format=raw,readonly,file=/usr/share/OVMF/OVMF_CODE.fd \
+	-chardev socket,id=chrtpm,path=swtpm/state/socket \
+	-tpmdev emulator,id=tpm0,chardev=chrtpm -device tpm-tis,tpmdev=tpm0 \
 	-monitor stdio

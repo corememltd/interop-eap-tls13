@@ -3,6 +3,9 @@
 !.gitlab-ci.yml
 
 packer*
-!packer.json
 
 certs
+
+*.qcow2
+*.iso
+*.exe

@@ -166,11 +166,14 @@ Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary,
 
 ### Microsoft Windows 11
 
-If you have QEMU (tested with version 5.2.0) and Windows 11 Insider Preview (Dev Channel, tested with build 22454) you can use the enclosed script:
+To use Windows 11 Insider Preview (Dev Channel, tested with build 22483) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
 
-    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22454.iso sh -x qemu-win11.sh
+    docker build -t swtpm swtpm
+    docker run -v "$PWD/swtpm/state:/run/swtpm" swtpm
 
-**N.B.** [later versions of Windows 11 are currently not supported](https://gitlab.com/coremem/networkradius/interop-eap-tls13/-/issues/1)
+Once running, you can use the enclosed script:
+
+    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22483.iso sh -x qemu-win11.sh
 
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
