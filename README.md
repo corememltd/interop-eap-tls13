@@ -194,7 +194,7 @@ From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.htm
 
 #### EAP-TTLS and PEAP
 
-If you have contacts on the Microsoft EAP team, they might be able to provide access to `EnableFeatureTool.exe` which you can use to enable these methods.
+If you have contacts on the Microsoft EAP team, they might be able to provide access to `EnableFeatureTool.exe` (tested version has MD5 matching `3c834de11f33fd7b3c5c6585f08d727f`) which you can use to enable these methods.
 
 # Development
 
