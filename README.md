@@ -128,6 +128,15 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
      * [screenshot](./wireshark-examples/screenshot.png)
      * [`dump.pcap`](./wireshark-examples/dump.pcap)
      * [`sslkey.log`](./wireshark-examples/sslkey.log)
+ * Windows 11
+     * PEAP/EAP-MSCHAPv2
+         * [`debug`](./wireshark-examples/win11/peap-eap-mschapv2/debug)
+         * [`dump.pcap`](./wireshark-examples/win11/peap-eap-mschapv2/dump.pcap)
+         * [`sslkey.log`](./wireshark-examples/win11/peap-eap-mschapv2/sslkey.log)
+     * EAP-TTLS/PAP - requires [patches](https://github.com/FreeRADIUS/freeradius-server/compare/v3.0.x...jimdigriz:eaptls13)
+         * [`debug`](./wireshark-examples/win11/ttls-pap/debug)
+         * [`dump.pcap`](./wireshark-examples/win11/ttls-pap/dump.pcap)
+         * [`sslkey.log`](./wireshark-examples/win11/ttls-pap/sslkey.log)
 
 **N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
 
