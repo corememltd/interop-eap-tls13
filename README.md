@@ -190,8 +190,6 @@ From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.htm
     set_link eth1 off
     set_link eth1 on
 
-**N.B.** if you use `tcpdump` on the `dot1x` interface inside the container, do *not* use promiscuous mode (without `-p`) otherwise you may need to toggle back on promiscuous mode with `ip link set dev dot1x promisc on`
-
 It is recommended you turn off system suspend on idle on the VM otherwise you may have to remember to type `system_wakeup` into the QEMU monitor to kick it back into life regularly.
 
 #### EAP-TTLS and PEAP
