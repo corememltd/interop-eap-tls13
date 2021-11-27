@@ -4,6 +4,7 @@ set -eux
 
 [ "${VENDOR:-}" -a "${PROJECT:-}" ] || { echo missing VENDOR/PROJECT environment variables; exit 1; }
 
+: ${REPO:=https://github.com/FreeRADIUS/freeradius-server.git}
 : ${BRANCH:=v3.0.x}
 : ${TAG:=v3.0.x}
 
@@ -108,21 +109,6 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 (
 	set -eu
 	cd /usr/src
-	if [ -d libkqueue ]; then
-		cd libkqueue
-		git reset --hard
-		git pull
-	else
-		git clone --single-branch --branch master https://github.com/mheily/libkqueue.git
-		cd libkqueue
-	fi
-	cmake -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_LIBDIR=lib
-	make -j$(($(getconf _NPROCESSORS_ONLN)+1))
-	make install
-)
-(
-	set -eu
-	cd /usr/src
 	# https://github.com/jimdigriz/freeradius-oauth2-perl#8021x-1
 	if [ -d hostap ]; then
 		cd hostap
@@ -146,7 +132,7 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git reset --hard
 		git pull
 	else
-		git clone --single-branch --branch $BRANCH https://github.com/FreeRADIUS/freeradius-server.git
+		git clone --single-branch --branch $BRANCH $REPO
 		cd freeradius-server
 		git checkout $TAG
 	fi
@@ -187,21 +173,6 @@ if [ "${PACKER_BUILDER_TYPE:-}" = null ]; then
 	invoke-rc.d freeradius start
 	invoke-rc.d freeradius reload
 fi
-
-(
-	set -eu
-	cd /usr/src
-	if [ -d wireshark-notes ]; then
-		cd wireshark-notes
-		git reset --hard
-		git pull
-	else
-		git clone https://git.lekensteyn.nl/peter/wireshark-notes.git
-		cd wireshark-notes
-	fi
-	make -C src
-	cp src/libsslkeylog.so /usr/local/lib/
-)
 
 ln -f -s /opt/$VENDOR/$PROJECT/services/nftables.conf /etc/nftables.conf
 systemctl enable nftables.service

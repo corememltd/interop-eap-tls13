@@ -6,11 +6,12 @@ PROJECT ?= interop-eap-tls13
 
 COMMITID = $(shell git rev-parse --short HEAD | tr -d '\n')$(shell git diff-files --quiet || printf -- -dirty)
 
+REPO ?= https://github.com/FreeRADIUS/freeradius-server.git
 BRANCH ?= v3.0.x
 TAG ?= release_3_0_25
 
 PACKER_VERSION = 1.7.8
-PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID) -var branch=$(BRANCH) -var tag=$(TAG)
+PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID) -var repo=$(REPO) -var branch=$(BRANCH) -var tag=$(TAG)
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
 ifneq ($(KERNEL),darwin)
@@ -53,12 +54,16 @@ endif
 ifneq ($(shell docker version 2>&-),)
 dev: PORT ?= 1812
 dev: L2TP_PORT ?= 1701
+dev: MOUNTS += $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro
+dev: MOUNTS += $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro
+ifneq ($(FREERADIUS_REPO),)
+dev: MOUNTS += $(FREERADIUS_REPO):/usr/src/freeradius-server
+endif
 dev: .stamp.docker
 	-docker run -it --rm \
 		--name $(PROJECT) \
 		-e container=docker \
-		-v $(CURDIR)/eapol_test:/opt/$(VENDOR)/$(PROJECT)/eapol_test:ro \
-		-v $(CURDIR)/services:/opt/$(VENDOR)/$(PROJECT)/services:ro \
+		$(foreach M,$(MOUNTS),-v $(M)) \
 		--publish=$(PORT):1812/udp --publish=$(PORT):1812/tcp \
 		--publish=$(L2TP_PORT):1701/udp --publish=$(L2TP_PORT):1701/tcp \
 		--tmpfs /run \

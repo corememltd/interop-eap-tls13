@@ -133,14 +133,13 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
 
 Inside the container, run in one terminal `tcpdump` set to capture all RADIUS authentication traffic:
 
-    tcpdump -n -p -i any -w - -U port 1812 | tee /tmp/dump.pcap | tcpdump -n -v -r -
+    tcpdump -n -p -i lo -w - -U port 1812 | tee /tmp/dump.pcap | tcpdump -n -v -r -
 
 **N.B.** alternatively you run this step on the host end against the `docker0` network interface
 
-Next is to use the included [`libsslkeylog.so` library](https://git.lekensteyn.nl/peter/wireshark-notes/) to capture all the SSL keying material necessary to let us later decode the traffic offline in Wireshark. This is done by running the following in another console terminal:
-
     systemctl stop freeradius
-    env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log freeradius -X | tee /tmp/debug
+    rm -f /tmp/sslkey.log
+    env SSLKEYLOGFILE=/tmp/sslkey.log freeradius -X | tee /tmp/debug
 
 **N.B.** you should delete `/tmp/sslkey.log` between subsequent runs
 
@@ -152,28 +151,22 @@ Now run some authentication requests with `eapol_test` in yet another console te
 On your host:
 
  1. open the 'Edit' menu and select 'Preferences'
- 1. open 'Protocols' and select 'SSL' from the list
+ 1. open 'Protocols' and select 'TLS' (older versions call it 'SSL') from the list
      * add '(Pre)-Master-Secret log' by browsing and selecting `sslkey.log`
      * click on 'OK'
  1. close the preferences window
  1. open `dump.pcap` in Wireshark
 
-##### SSL Key Logging from `eapol_test`
-
-Instead of using `LD_PRELOAD` on the server end against the `freeradius` binary, you can capture the keying material from the client end instead with:
-
-    env LD_PRELOAD=/usr/local/lib/libsslkeylog.so SSLKEYLOGFILE=/tmp/sslkey.log eapol_test -s testing123 -a 127.0.0.1 -p 1812 -c eapol_test/eapol_test.tls.conf
-
 ### Microsoft Windows 11
 
-To use Windows 11 Insider Preview (Dev Channel, tested with build 22483) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
+To use Windows 11 Insider Preview (Dev Channel, tested with build 22499, upgraded to 22504.1000) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
 
     docker build -t swtpm swtpm
     docker run -v "$PWD/swtpm/state:/run/swtpm" swtpm
 
 Once running, you can use the enclosed script:
 
-    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22483.iso sh -x qemu-win11.sh
+    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22499.iso sh -x qemu-win11.sh
 
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
@@ -183,8 +176,6 @@ The script will also fetch the [virtio-win drivers](https://github.com/virtio-wi
 
 **N.B.** when you configure the network interface, make sure you use the old 'Control Panel' interface as it will reflect your 802.1X configuration correctly
 
-**N.B.** due to a (known to MS) bug in wired 802.1X, if you see no traffic going to the RADIUS server, use the old 'Control Panel' interface to 'Disable' and re-enable the interface to clear it out from a latched/wedged state
-
 From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.html), you can type the following to toggle the network link state:
 
     set_link eth1 off
@@ -192,9 +183,37 @@ From the [QEMU monitor](https://qemu.readthedocs.io/en/latest/system/monitor.htm
 
 **N.B.** if you use `tcpdump` on the `dot1x` interface inside the container, do *not* use promiscuous mode (without `-p`) otherwise you may need to toggle back on promiscuous mode with `ip link set dev dot1x promisc on`
 
+It is recommended you turn off system suspend on idle on the VM otherwise you may have to remember to type `system_wakeup` into the QEMU monitor to kick it back into life regularly.
+
 #### EAP-TTLS and PEAP
 
 If you have contacts on the Microsoft EAP team, they might be able to provide access to `EnableFeatureTool.exe` (tested version has MD5 matching `3c834de11f33fd7b3c5c6585f08d727f`) which you can use to enable these methods.
+
+**N.B.** when using PEAP make sure you have 'Disconnect if server does not present cryptobinding TLV' *unchecked* as FreeRADIUS does not currently support this
+
+#### Bugs
+
+These are observed bugs in Windows 11:
+
+ 1. even if you ask *not* to verify against a CA or server name, you still must configure it all:
+     * set 'Connect to these servers' to `Example Server Certificate`
+     * set 'Trusted Root Certificate Authorities' to `Example Certificate Authority`
+ 1. due to a (known to MS) bug in wired 802.1X, if you see no traffic going to the RADIUS server, use the old 'Control Panel' interface to 'Disable' and re-enable the interface to clear it out from a latched/wedged state
+ 1. the 'Sign in' button in the new UI may not appear or stop functioning resulting in no EAP communication
+     * a workaround is to close completely the new UI page and let the prompt re-open it for you
+     * if that fails, make sure you have checked 'Fall-back to unauthorized network access', otherwise you will never see the 'Sign in' button or popup window to enter credentials
+ 1. for EAP-TTLS when the new UI asks you to confirm the presented server certificate clicking on 'Show certificate details' does no more than jiggle the popup. The workaround is to set it up to avoid any certificate related popups (request for the user credential popup works fine though)
+     * create a working PEAP profile and authenticate with it
+     * export this PEAP profile with:
+
+           netsh lan export profile folder=path_to_folder
+
+     * open the profile and find *all* the values (even if you have selected only one, there seem to be two in there regardless!) used for `TrustedRootCA` in the XML and make a note of it
+     * create a EAP-TTLS profile as usual and then export it like the PEAP one
+     * open the profile and replace the value used for `TrustedRootCAHash` (`TrustedRootCA` is not used here you need to use `Hash`) in the XML with the one from the PEAP profile
+     * import the updated profile with:
+
+           netsh lan add profile interface="Ethernet 2" filename="EAP_TTLS_profile_file_path"
 
 # Development
 
@@ -234,8 +253,10 @@ Where the configuration values are described as:
  * **`PORT` (default: `1812`):** sets the port number that RADIUS authentication is exposed on your workstation
  * **`FROM` (default: [`debian:bullseye-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
      * [`ubuntu:focal`](https://hub.docker.com/_/ubuntu/) is also known to work
+ * **`REPO` (default: `https://github.com/FreeRADIUS/freeradius-server.git`):** sets the repo source of FreeRADIUS to use
  * **`BRANCH` (default: `v3.0.x`):** sets the branch of FreeRADIUS to use
  * **`TAG` (default: `release_3_0_25`):** sets the tag of FreeRADIUS to use
+     * when using a custom branch where no tag is avaliable you should use `HEAD` here
 
 Additional information about the environment:
 
@@ -264,13 +285,3 @@ Once ready, run the following:
 **N.B.** `SSH_HOST` is required and `SSH_USER` defaults to your username (provided via the environment variable `$USER`)
 
 **N.B.** it is safe to rerun the deploy against a VM server you have already deployed to
-
-## Custom Build
-
-### FreeRADIUS
-
-...
-
-### hostap
-
-...

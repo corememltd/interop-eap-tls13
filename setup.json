@@ -63,10 +63,11 @@
       "environment_vars": [
         "VENDOR={{ user `vendor` }}",
         "PROJECT={{ user `project` }}",
+        "REPO={{ user `repo` }}",
         "BRANCH={{ user `branch` }}",
         "TAG={{ user `tag` }}"
       ],
-      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:+$SUDO --preserve-env=PACKER_BUILDER_TYPE,VENDOR,PROJECT,BRANCH,TAG} /bin/sh -eux '{{ .Path }}'",
+      "execute_command": "[ $(id -u) -eq 0 ] || SUDO=sudo; env {{ .Vars }} ${SUDO:+$SUDO --preserve-env=PACKER_BUILDER_TYPE,VENDOR,PROJECT,REPO,BRANCH,TAG} /bin/sh -eux '{{ .Path }}'",
       "script": "setup",
       "type": "shell"
     },
