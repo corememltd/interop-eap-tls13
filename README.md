@@ -260,6 +260,11 @@ Where the configuration values are described as:
  * **`PORT` (default: `1812`):** sets the port number that RADIUS authentication is exposed on your workstation
  * **`FROM` (default: [`debian:bullseye-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
      * [`ubuntu:focal`](https://hub.docker.com/_/ubuntu/) is also known to work
+ * **`FREERADIUS_REPO`:** if you want to work on a local tree, set this to the path of your local FreeRADIUS source tree and run the following inside the container to build and apply (do not install the 'config' Debian package!):
+
+           make -C /usr/src/freeradius-server deb
+           dpkg -i /usr/src/{freeradius,libfreeradius3}_*_amd64.deb
+
  * **`REPO` (default: `https://github.com/FreeRADIUS/freeradius-server.git`):** sets the repo source of FreeRADIUS to use
  * **`BRANCH` (default: `v3.0.x`):** sets the branch of FreeRADIUS to use
  * **`TAG` (default: `release_3_0_25`):** sets the tag of FreeRADIUS to use
