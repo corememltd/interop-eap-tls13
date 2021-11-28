@@ -129,14 +129,36 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
      * [`dump.pcap`](./wireshark-examples/dump.pcap)
      * [`sslkey.log`](./wireshark-examples/sslkey.log)
  * Windows 11
-     * PEAP/EAP-MSCHAPv2
-         * [`debug`](./wireshark-examples/win11/peap-eap-mschapv2/debug)
-         * [`dump.pcap`](./wireshark-examples/win11/peap-eap-mschapv2/dump.pcap)
-         * [`sslkey.log`](./wireshark-examples/win11/peap-eap-mschapv2/sslkey.log)
-     * EAP-TTLS/PAP - requires [patches](https://github.com/FreeRADIUS/freeradius-server/compare/v3.0.x...jimdigriz:eaptls13)
-         * [`debug`](./wireshark-examples/win11/ttls-pap/debug)
-         * [`dump.pcap`](./wireshark-examples/win11/ttls-pap/dump.pcap)
-         * [`sslkey.log`](./wireshark-examples/win11/ttls-pap/sslkey.log)
+     * PEAP
+         * EAP-MSCHAPv2
+             * [`debug`](./wireshark-examples/win11/peap-eap-mschapv2/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/peap-eap-mschapv2/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/peap-eap-mschapv2/sslkey.log)
+         * EAP-TLS
+             * [`debug`](./wireshark-examples/win11/peap-eap-tls/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/peap-eap-tls/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/peap-eap-tls/sslkey.log)
+     * EAP-TTLS - requires [patches](https://github.com/FreeRADIUS/freeradius-server/compare/v3.0.x...jimdigriz:eaptls13)
+         * PAP
+             * [`debug`](./wireshark-examples/win11/ttls-pap/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/ttls-pap/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/ttls-pap/sslkey.log)
+         * CHAP
+             * [`debug`](./wireshark-examples/win11/ttls-chap/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/ttls-chap/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/ttls-chap/sslkey.log)
+         * MSCHAP
+             * [`debug`](./wireshark-examples/win11/ttls-mschap/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/ttls-mschap/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/ttls-mschap/sslkey.log)
+         * EAP-TLS
+             * [`debug`](./wireshark-examples/win11/ttls-eap-tls/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/ttls-eap-tls/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/ttls-eap-tls/sslkey.log)
+         * EAP-MSCHAPv2
+             * [`debug`](./wireshark-examples/win11/ttls-eap-mschapv2/debug)
+             * [`dump.pcap`](./wireshark-examples/win11/ttls-eap-mschapv2/dump.pcap)
+             * [`sslkey.log`](./wireshark-examples/win11/ttls-eap-mschapv2/sslkey.log)
 
 **N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
 
