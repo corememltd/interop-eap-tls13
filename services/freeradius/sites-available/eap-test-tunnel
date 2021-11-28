@@ -9,6 +9,7 @@ authorize {
 		}
 	}
 
+	chap
 	mschap
 	suffix
 	update control {
@@ -23,6 +24,7 @@ authorize {
 
 authenticate {
 	pap
+	chap
 	mschap
 	eap-test
 }
