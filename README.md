@@ -166,6 +166,8 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
 
 **N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
 
+**N.B.** Wireshark is currently unable to decode the [inner tunnel of PEAP](https://gitlab.com/coremem/networkradius/wireshark/-/compare/master...eap-peap-inner?from_project_id=31479930&w=1) or any inner EAP-TLS session
+
 Inside the container, run in one terminal `tcpdump` set to capture all RADIUS authentication traffic:
 
     tcpdump -n -p -i lo -w - -U port 1812 | tee /tmp/dump.pcap | tcpdump -n -v -r -
