@@ -151,6 +151,8 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
              * [`debug`](./wireshark-examples/win11/ttls-mschap/debug)
              * [`dump.pcap`](./wireshark-examples/win11/ttls-mschap/dump.pcap)
              * [`sslkey.log`](./wireshark-examples/win11/ttls-mschap/sslkey.log)
+         * MSCHAPv2
+             * not working, under investigation
          * EAP-TLS
              * [`debug`](./wireshark-examples/win11/ttls-eap-tls/debug)
              * [`dump.pcap`](./wireshark-examples/win11/ttls-eap-tls/dump.pcap)
