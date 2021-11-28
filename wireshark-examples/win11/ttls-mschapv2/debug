@@ -1,0 +1,1058 @@
+FreeRADIUS Version 3.0.26
+Copyright (C) 1999-2021 The FreeRADIUS server project and contributors
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE
+You may redistribute copies of FreeRADIUS under the terms of the
+GNU General Public License
+For more information about these matters, see the file named COPYRIGHT
+Starting - reading configuration files ...
+including dictionary file /usr/share/freeradius/dictionary
+including dictionary file /usr/share/freeradius/dictionary.dhcp
+including dictionary file /usr/share/freeradius/dictionary.vqp
+including dictionary file /etc/freeradius/dictionary
+including configuration file /etc/freeradius/radiusd.conf
+including configuration file /etc/freeradius/proxy.conf
+including configuration file /etc/freeradius/clients.conf
+including files in directory /etc/freeradius/mods-enabled/
+including configuration file /etc/freeradius/mods-enabled/detail
+including configuration file /etc/freeradius/mods-enabled/realm
+including configuration file /etc/freeradius/mods-enabled/pap
+including configuration file /etc/freeradius/mods-enabled/files
+including configuration file /etc/freeradius/mods-enabled/always
+including configuration file /etc/freeradius/mods-enabled/mschap
+including configuration file /etc/freeradius/mods-enabled/eap-test
+including configuration file /etc/freeradius/mods-enabled/chap
+including files in directory /etc/freeradius/policy.d/
+including configuration file /etc/freeradius/policy.d/test-files
+including configuration file /etc/freeradius/policy.d/canonicalization
+including configuration file /etc/freeradius/policy.d/accounting
+including configuration file /etc/freeradius/policy.d/operator-name
+including configuration file /etc/freeradius/policy.d/filter
+including configuration file /etc/freeradius/policy.d/debug
+including configuration file /etc/freeradius/policy.d/control
+including configuration file /etc/freeradius/policy.d/moonshot-targeted-ids
+including configuration file /etc/freeradius/policy.d/eap
+including configuration file /etc/freeradius/policy.d/rfc7542
+including configuration file /etc/freeradius/policy.d/cui
+including configuration file /etc/freeradius/policy.d/abfab-tr
+including configuration file /etc/freeradius/policy.d/dhcp
+including files in directory /etc/freeradius/sites-enabled/
+including configuration file /etc/freeradius/sites-enabled/eap-test-tunnel
+including configuration file /etc/freeradius/sites-enabled/test
+main {
+ security {
+ 	user = "freerad"
+ 	group = "freerad"
+ 	allow_core_dumps = no
+ }
+	name = "freeradius"
+	prefix = "/usr"
+	localstatedir = "/var"
+	logdir = "/var/log/freeradius"
+	run_dir = "/var/run/freeradius"
+}
+main {
+	name = "freeradius"
+	prefix = "/usr"
+	localstatedir = "/var"
+	sbindir = "/usr/sbin"
+	logdir = "/var/log/freeradius"
+	run_dir = "/var/run/freeradius"
+	libdir = "/usr/lib/freeradius"
+	radacctdir = "/var/log/freeradius/radacct"
+	hostname_lookups = no
+	max_request_time = 30
+	cleanup_delay = 5
+	max_requests = 16384
+	postauth_client_lost = no
+	pidfile = "/var/run/freeradius/freeradius.pid"
+	checkrad = "/usr/sbin/checkrad"
+	debug_level = 0
+	proxy_requests = yes
+ log {
+ 	stripped_names = no
+ 	auth = no
+ 	auth_badpass = no
+ 	auth_goodpass = no
+ 	colourise = yes
+ 	msg_denied = "You are already logged in - access denied"
+ }
+ resources {
+ }
+ security {
+ 	max_attributes = 200
+ 	reject_delay = 1.000000
+ 	status_server = yes
+ }
+}
+radiusd: #### Loading Realms and Home Servers ####
+ proxy server {
+ 	retry_delay = 5
+ 	retry_count = 3
+ 	default_fallback = no
+ 	dead_time = 120
+ 	wake_all_if_all_dead = no
+ }
+ home_server localhost {
+ 	ipaddr = 127.0.0.1
+ 	port = 1812
+ 	type = "auth"
+ 	secret = <<< secret >>>
+ 	response_window = 20.000000
+ 	response_timeouts = 1
+ 	max_outstanding = 65536
+ 	zombie_period = 40
+ 	status_check = "status-server"
+ 	ping_interval = 30
+ 	check_interval = 30
+ 	check_timeout = 4
+ 	num_answers_to_alive = 3
+ 	revive_interval = 120
+  limit {
+  	max_connections = 16
+  	max_requests = 0
+  	lifetime = 0
+  	idle_timeout = 0
+  }
+  coa {
+  	irt = 2
+  	mrt = 16
+  	mrc = 5
+  	mrd = 30
+  }
+ }
+ home_server_pool my_auth_failover {
+	type = fail-over
+	home_server = localhost
+ }
+ realm example.com {
+	auth_pool = my_auth_failover
+ }
+ realm LOCAL {
+ }
+radiusd: #### Loading Clients ####
+ client localhost {
+ 	ipaddr = 127.0.0.1
+ 	require_message_authenticator = no
+ 	secret = <<< secret >>>
+ 	nas_type = "other"
+ 	proto = "*"
+  limit {
+  	max_connections = 16
+  	lifetime = 0
+  	idle_timeout = 30
+  }
+ }
+ client localhost_ipv6 {
+ 	ipv6addr = ::1
+ 	require_message_authenticator = no
+ 	secret = <<< secret >>>
+  limit {
+  	max_connections = 16
+  	lifetime = 0
+  	idle_timeout = 30
+  }
+ }
+Debugger not attached
+systemd watchdog is disabled
+ # Creating Auth-Type = pap
+ # Creating Auth-Type = chap
+ # Creating Auth-Type = mschap
+ # Creating Auth-Type = eap-test
+radiusd: #### Instantiating modules ####
+ modules {
+  # Loaded module rlm_detail
+  # Loading module "detail" from file /etc/freeradius/mods-enabled/detail
+  detail {
+  	filename = "/var/log/freeradius/radacct/%{%{Packet-Src-IP-Address}:-%{Packet-Src-IPv6-Address}}/detail-%Y%m%d"
+  	header = "%t"
+  	permissions = 384
+  	locking = no
+  	escape_filenames = no
+  	log_packet_header = no
+  }
+  # Loaded module rlm_realm
+  # Loading module "IPASS" from file /etc/freeradius/mods-enabled/realm
+  realm IPASS {
+  	format = "prefix"
+  	delimiter = "/"
+  	ignore_default = no
+  	ignore_null = no
+  }
+  # Loading module "suffix" from file /etc/freeradius/mods-enabled/realm
+  realm suffix {
+  	format = "suffix"
+  	delimiter = "@"
+  	ignore_default = no
+  	ignore_null = no
+  }
+  # Loading module "bangpath" from file /etc/freeradius/mods-enabled/realm
+  realm bangpath {
+  	format = "prefix"
+  	delimiter = "!"
+  	ignore_default = no
+  	ignore_null = no
+  }
+  # Loading module "realmpercent" from file /etc/freeradius/mods-enabled/realm
+  realm realmpercent {
+  	format = "suffix"
+  	delimiter = "%"
+  	ignore_default = no
+  	ignore_null = no
+  }
+  # Loading module "ntdomain" from file /etc/freeradius/mods-enabled/realm
+  realm ntdomain {
+  	format = "prefix"
+  	delimiter = "\\"
+  	ignore_default = no
+  	ignore_null = no
+  }
+  # Loaded module rlm_pap
+  # Loading module "pap" from file /etc/freeradius/mods-enabled/pap
+  pap {
+  	normalise = yes
+  }
+  # Loaded module rlm_files
+  # Loading module "files" from file /etc/freeradius/mods-enabled/files
+  files {
+  	filename = "/etc/freeradius/mods-config/files/authorize"
+  	acctusersfile = "/etc/freeradius/mods-config/files/accounting"
+  	preproxy_usersfile = "/etc/freeradius/mods-config/files/pre-proxy"
+  }
+  # Loaded module rlm_always
+  # Loading module "reject" from file /etc/freeradius/mods-enabled/always
+  always reject {
+  	rcode = "reject"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "fail" from file /etc/freeradius/mods-enabled/always
+  always fail {
+  	rcode = "fail"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "ok" from file /etc/freeradius/mods-enabled/always
+  always ok {
+  	rcode = "ok"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "handled" from file /etc/freeradius/mods-enabled/always
+  always handled {
+  	rcode = "handled"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "invalid" from file /etc/freeradius/mods-enabled/always
+  always invalid {
+  	rcode = "invalid"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "userlock" from file /etc/freeradius/mods-enabled/always
+  always userlock {
+  	rcode = "userlock"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "notfound" from file /etc/freeradius/mods-enabled/always
+  always notfound {
+  	rcode = "notfound"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "noop" from file /etc/freeradius/mods-enabled/always
+  always noop {
+  	rcode = "noop"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loading module "updated" from file /etc/freeradius/mods-enabled/always
+  always updated {
+  	rcode = "updated"
+  	simulcount = 0
+  	mpp = no
+  }
+  # Loaded module rlm_mschap
+  # Loading module "mschap" from file /etc/freeradius/mods-enabled/mschap
+  mschap {
+  	use_mppe = yes
+  	require_encryption = no
+  	require_strong = no
+  	with_ntdomain_hack = yes
+   passchange {
+   }
+  	allow_retry = yes
+  	winbind_retry_with_normalised_username = no
+  }
+  # Loaded module rlm_eap
+  # Loading module "eap-test" from file /etc/freeradius/mods-enabled/eap-test
+  eap eap-test {
+  	default_eap_type = "tls"
+  	timer_expire = 60
+  	ignore_unknown_eap_types = no
+  	cisco_accounting_username_bug = no
+  	max_sessions = 16384
+  }
+  # Loaded module rlm_chap
+  # Loading module "chap" from file /etc/freeradius/mods-enabled/chap
+  instantiate {
+  }
+  # Instantiating module "detail" from file /etc/freeradius/mods-enabled/detail
+  # Instantiating module "IPASS" from file /etc/freeradius/mods-enabled/realm
+  # Instantiating module "suffix" from file /etc/freeradius/mods-enabled/realm
+  # Instantiating module "bangpath" from file /etc/freeradius/mods-enabled/realm
+  # Instantiating module "realmpercent" from file /etc/freeradius/mods-enabled/realm
+  # Instantiating module "ntdomain" from file /etc/freeradius/mods-enabled/realm
+  # Instantiating module "pap" from file /etc/freeradius/mods-enabled/pap
+  # Instantiating module "files" from file /etc/freeradius/mods-enabled/files
+reading pairlist file /etc/freeradius/mods-config/files/authorize
+reading pairlist file /etc/freeradius/mods-config/files/accounting
+reading pairlist file /etc/freeradius/mods-config/files/pre-proxy
+  # Instantiating module "reject" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "fail" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "ok" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "handled" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "invalid" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "userlock" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "notfound" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "noop" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "updated" from file /etc/freeradius/mods-enabled/always
+  # Instantiating module "mschap" from file /etc/freeradius/mods-enabled/mschap
+rlm_mschap (mschap): using internal authentication
+  # Instantiating module "eap-test" from file /etc/freeradius/mods-enabled/eap-test
+   # Linked to sub-module rlm_eap_md5
+   # Linked to sub-module rlm_eap_pwd
+   pwd {
+   	group = 19
+   	fragment_size = 1020
+   	server_id = "theserver@example.com"
+   	virtual_server = "eap-test-inner"
+   	prep = 0
+   	unhex = 1
+   }
+   # Linked to sub-module rlm_eap_gtc
+   gtc {
+   	challenge = "Password: "
+   	auth_type = "PAP"
+   }
+   # Linked to sub-module rlm_eap_tls
+   tls {
+   	tls = "tls-common"
+   }
+   tls-config tls-common {
+   	verify_depth = 0
+   	ca_path = "/etc/freeradius/certs"
+   	pem_file_type = yes
+   	private_key_file = "/etc/freeradius/certs/server.pem"
+   	certificate_file = "/etc/freeradius/certs/server.pem"
+   	ca_file = "/etc/freeradius/certs/ca.pem"
+   	private_key_password = <<< secret >>>
+   	dh_file = "/etc/freeradius/certs/dh"
+   	fragment_size = 1024
+   	include_length = yes
+   	auto_chain = yes
+   	check_crl = no
+   	check_all_crl = no
+   	ca_path_reload_interval = 0
+   	cipher_list = "DEFAULT"
+   	cipher_server_preference = no
+   	reject_unknown_intermediate_ca = no
+   	ecdh_curve = ""
+   	tls_max_version = "1.3"
+   	tls_min_version = "1.0"
+   	tls13_enable = yes
+    cache {
+    	enable = no
+    	lifetime = 24
+    	max_entries = 255
+    	persist_dir = "/var/log/freeradius/tlscache"
+    }
+    verify {
+    	skip_if_ocsp_ok = no
+    }
+    ocsp {
+    	enable = no
+    	override_cert_url = yes
+    	url = "http://127.0.0.1/ocsp/"
+    	use_nonce = yes
+    	timeout = 0
+    	softfail = no
+    }
+   }
+tls: In order to use TLS 1.0 and/or TLS 1.1, you likely need to set: cipher_list = "DEFAULT@SECLEVEL=1"
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! Most supplicants do not support EAP-TLS with TLS 1.3
+!! Please set tls_max_version = "1.2"
+!! FreeRADIUS only supports TLS 1.3 for special builds of wpa_supplicant and Windows
+!! This limitation is likely to change in late 2021.
+!! If you are using this version of FreeRADIUS after 2021, you will probably need to upgrade
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   # Linked to sub-module rlm_eap_ttls
+   ttls {
+   	tls = "tls-common"
+   	default_eap_type = "md5"
+   	copy_request_to_tunnel = no
+   	use_tunneled_reply = yes
+   	virtual_server = "eap-test-inner"
+   	include_length = yes
+   	require_client_cert = no
+   }
+tls: Using cached TLS configuration from previous invocation
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! There is no standard for using TTLS with TLS 1.3
+!! Please set tls_max_version = "1.2"
+!! FreeRADIUS only supports TLS 1.3 for special builds of wpa_supplicant and Windows
+!! This limitation is likely to change in late 2021.
+!! If you are using this version of FreeRADIUS after 2021, you will probably need to upgrade
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   # Linked to sub-module rlm_eap_peap
+   peap {
+   	tls = "tls-common"
+   	default_eap_type = "mschapv2"
+   	copy_request_to_tunnel = no
+   	use_tunneled_reply = yes
+   	proxy_tunneled_request_as_eap = yes
+   	virtual_server = "eap-test-inner"
+   	soh = no
+   	require_client_cert = no
+   }
+tls: Using cached TLS configuration from previous invocation
+Failed to find 'Auth-Type eap' section in virtual server eap-test-inner.  The server cannot proxy inner-tunnel EAP packets.
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! There is no standard for using PEAP with TLS 1.3
+!! Please set tls_max_version = "1.2"
+!! FreeRADIUS only supports TLS 1.3 for special builds of wpa_supplicant and Windows
+!! This limitation is likely to change in late 2021.
+!! If you are using this version of FreeRADIUS after 2021, you will probably need to upgrade
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+   # Linked to sub-module rlm_eap_mschapv2
+   mschapv2 {
+   	with_ntdomain_hack = no
+   	send_error = no
+   }
+   # Linked to sub-module rlm_eap_fast
+   fast {
+   	tls = "tls-common"
+   	default_eap_type = "mschapv2"
+   	virtual_server = "eap-test-inner"
+   	cipher_list = "ALL:!EXPORT:!eNULL:!SSLv2"
+   	require_client_cert = no
+   	pac_lifetime = 604800
+   	authority_identity = "1234"
+   	pac_opaque_key = "0123456789abcdef0123456789ABCDEF"
+   	copy_request_to_tunnel = no
+   	use_tunneled_reply = no
+   }
+tls: Using cached TLS configuration from previous invocation
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! There is no standard for using EAP-FAST with TLS 1.3
+!! Please set tls_max_version = "1.2"
+!! FreeRADIUS only supports TLS 1.3 for special builds of wpa_supplicant and Windows
+!! This limitation is likely to change in late 2021.
+!! If you are using this version of FreeRADIUS after 2021, you will probably need to upgrade
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ } # modules
+radiusd: #### Loading Virtual Servers ####
+server { # from file /etc/freeradius/radiusd.conf
+} # server
+server eap-test-inner { # from file /etc/freeradius/sites-enabled/eap-test-tunnel
+ # Loading authenticate {...}
+ # Loading authorize {...}
+ # Loading post-auth {...}
+} # server eap-test-inner
+server test { # from file /etc/freeradius/sites-enabled/test
+ # Loading authenticate {...}
+ # Loading authorize {...}
+ # Loading accounting {...}
+} # server test
+radiusd: #### Opening IP addresses and Ports ####
+listen {
+  	type = "auth"
+  	ipv6addr = ::
+  	port = 0
+  	proto = "udp"
+  client everyone_ipv6 {
+  	ipv6addr = ::/0
+  	require_message_authenticator = no
+  	secret = <<< secret >>>
+   limit {
+   	max_connections = 16
+   	lifetime = 0
+   	idle_timeout = 30
+   }
+  }
+  client everyone_ipv4 {
+  	ipv4addr = 0.0.0.0/0
+  	require_message_authenticator = no
+  	secret = <<< secret >>>
+   limit {
+   	max_connections = 16
+   	lifetime = 0
+   	idle_timeout = 30
+   }
+  }
+}
+listen {
+  	type = "auth"
+  	ipv6addr = ::
+  	port = 0
+  	proto = "tcp"
+}
+listen {
+  	type = "auth"
+  	ipv4addr = 0.0.0.0
+  	port = 0
+  	proto = "udp"
+}
+listen {
+  	type = "auth"
+  	ipv4addr = 0.0.0.0
+  	port = 0
+  	proto = "tcp"
+}
+Listening on auth address :: port 1812 bound to server test
+Listening on auth proto tcp address :: port 1812 bound to server test
+Listening on auth address * port 1812 bound to server test
+Listening on auth proto tcp address * port 1812 bound to server test
+Listening on proxy address * port 39774
+Listening on proxy address :: port 38315
+Ready to process requests
+(0) Received Access-Request Id 242 from 127.0.0.1:50758 to 127.0.0.1:1812 length 178
+(0)   User-Name = "anonymous"
+(0)   NAS-IP-Address = 127.0.0.1
+(0)   NAS-Identifier = "hostapd"
+(0)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(0)   NAS-Port-Type = Wireless-802.11
+(0)   Service-Type = Framed-User
+(0)   Calling-Station-Id = "52-54-00-12-34-57"
+(0)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(0)   Acct-Session-Id = "ED5DFD019D4601D4"
+(0)   Framed-MTU = 1400
+(0)   EAP-Message = 0x0270000e01616e6f6e796d6f7573
+(0)   Message-Authenticator = 0x0303dc676a96afabc85d7f5d50da8716
+(0) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(0)   authorize {
+(0)     if (User-Name == "bob") {
+(0)     if (User-Name == "bob")  -> FALSE
+(0)     [mschap] = noop
+(0) eap-test: Peer sent EAP Response (code 2) ID 112 length 14
+(0) eap-test: EAP-Identity reply, returning 'ok' so we can short-circuit the rest of authorize
+(0)     [eap-test] = ok
+Not doing PAP as Auth-Type is already set.
+(0)     [pap] = noop
+(0)   } # authorize = ok
+(0) Found Auth-Type = eap-test
+(0) # Executing group from file /etc/freeradius/sites-enabled/test
+(0)   authenticate {
+(0) eap-test: Peer sent packet with method EAP Identity (1)
+(0) eap-test: Calling submodule eap_tls to process data
+(0) eap_tls: (TLS) Initiating new session
+(0) eap_tls: (TLS) Setting verify mode to require certificate from client
+(0) eap-test: Sending EAP Request (code 1) ID 113 length 6
+(0) eap-test: EAP session adding &reply:State = 0xacb526dcacc42b8e
+(0)     [eap-test] = handled
+(0)   } # authenticate = handled
+(0) Using Post-Auth-Type Challenge
+(0) Post-Auth-Type sub-section not found.  Ignoring.
+(0) session-state: Saving cached attributes
+(0)   Framed-MTU = 984
+(0) Sent Access-Challenge Id 242 from 127.0.0.1:1812 to 127.0.0.1:50758 length 64
+(0)   EAP-Message = 0x017100060d20
+(0)   Message-Authenticator = 0x00000000000000000000000000000000
+(0)   State = 0xacb526dcacc42b8ebde94534305b14a5
+(0) Finished request
+Waking up in 4.9 seconds.
+(1) Received Access-Request Id 243 from 127.0.0.1:50758 to 127.0.0.1:1812 length 188
+(1)   User-Name = "anonymous"
+(1)   NAS-IP-Address = 127.0.0.1
+(1)   NAS-Identifier = "hostapd"
+(1)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(1)   NAS-Port-Type = Wireless-802.11
+(1)   Service-Type = Framed-User
+(1)   Calling-Station-Id = "52-54-00-12-34-57"
+(1)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(1)   Acct-Session-Id = "ED5DFD019D4601D4"
+(1)   Framed-MTU = 1400
+(1)   EAP-Message = 0x027100060315
+(1)   State = 0xacb526dcacc42b8ebde94534305b14a5
+(1)   Message-Authenticator = 0xe626a29059b6950126791b132e4a4ce5
+(1) Restoring &session-state
+(1)   &session-state:Framed-MTU = 984
+(1) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(1)   authorize {
+(1)     if (User-Name == "bob") {
+(1)     if (User-Name == "bob")  -> FALSE
+(1)     [mschap] = noop
+(1) eap-test: Peer sent EAP Response (code 2) ID 113 length 6
+(1) eap-test: No EAP Start, assuming it's an on-going EAP conversation
+(1)     [eap-test] = updated
+Not doing PAP as Auth-Type is already set.
+(1)     [pap] = noop
+(1)   } # authorize = updated
+(1) Found Auth-Type = eap-test
+(1) # Executing group from file /etc/freeradius/sites-enabled/test
+(1)   authenticate {
+(1) eap-test: Expiring EAP session with state 0xacb526dcacc42b8e
+(1) eap-test: Finished EAP session with state 0xacb526dcacc42b8e
+(1) eap-test: Previous EAP request found for state 0xacb526dcacc42b8e, released from the list
+(1) eap-test: Peer sent packet with method EAP NAK (3)
+(1) eap-test: Found mutually acceptable type TTLS (21)
+(1) eap-test: Calling submodule eap_ttls to process data
+(1) eap_ttls: (TLS) Initiating new session
+(1) eap-test: Sending EAP Request (code 1) ID 114 length 6
+(1) eap-test: EAP session adding &reply:State = 0xacb526dcadc7338e
+(1)     [eap-test] = handled
+(1)   } # authenticate = handled
+(1) Using Post-Auth-Type Challenge
+(1) Post-Auth-Type sub-section not found.  Ignoring.
+(1) session-state: Saving cached attributes
+(1)   Framed-MTU = 984
+(1) Sent Access-Challenge Id 243 from 127.0.0.1:1812 to 127.0.0.1:50758 length 64
+(1)   EAP-Message = 0x017200061520
+(1)   Message-Authenticator = 0x00000000000000000000000000000000
+(1)   State = 0xacb526dcadc7338ebde94534305b14a5
+(1) Finished request
+Waking up in 4.9 seconds.
+(2) Received Access-Request Id 244 from 127.0.0.1:50758 to 127.0.0.1:1812 length 445
+(2)   User-Name = "anonymous"
+(2)   NAS-IP-Address = 127.0.0.1
+(2)   NAS-Identifier = "hostapd"
+(2)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(2)   NAS-Port-Type = Wireless-802.11
+(2)   Service-Type = Framed-User
+(2)   Calling-Station-Id = "52-54-00-12-34-57"
+(2)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(2)   Acct-Session-Id = "ED5DFD019D4601D4"
+(2)   Framed-MTU = 1400
+(2)   EAP-Message = 0x027201051580000000fb16030100f6010000f20303321cb6cfbf73dd95f54ca4edc9d15ca47a272a570ea7deab39cfab51b6bee1bb20b81c864e688395c909ea1e4bd13d75a41bf78113d8e6947144e33fabacc188ce002813021301c02cc02bc030c02fc024c023c028c027c00ac009c014c013009d009c003d003c0035002f01000081000500050100000000002b0009080304030303020301000d001a001808040805080604010501020104030503020302020601060300230000000a00080006001d00170018003300260024001d002079bc32e264ca8b3ac239d37e897f39d629145a1787273a85ea51a2c228bd34060031000000170000ff01000100002d00020101
+(2)   State = 0xacb526dcadc7338ebde94534305b14a5
+(2)   Message-Authenticator = 0xff94d17d4061ee0c4b06f5b8445f8f59
+(2) Restoring &session-state
+(2)   &session-state:Framed-MTU = 984
+(2) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(2)   authorize {
+(2)     if (User-Name == "bob") {
+(2)     if (User-Name == "bob")  -> FALSE
+(2)     [mschap] = noop
+(2) eap-test: Peer sent EAP Response (code 2) ID 114 length 261
+(2) eap-test: Continuing tunnel setup
+(2)     [eap-test] = ok
+(2)     [pap] = noop
+(2)   } # authorize = ok
+(2) Found Auth-Type = eap-test
+(2) # Executing group from file /etc/freeradius/sites-enabled/test
+(2)   authenticate {
+(2) eap-test: Expiring EAP session with state 0xacb526dcadc7338e
+(2) eap-test: Finished EAP session with state 0xacb526dcadc7338e
+(2) eap-test: Previous EAP request found for state 0xacb526dcadc7338e, released from the list
+(2) eap-test: Peer sent packet with method EAP TTLS (21)
+(2) eap-test: Calling submodule eap_ttls to process data
+(2) eap_ttls: Authenticate
+(2) eap_ttls: (TLS) EAP Peer says that the final record size will be 251 bytes
+(2) eap_ttls: (TLS) EAP Got all data (251 bytes)
+(2) eap_ttls: (TLS) Handshake state - before SSL initialization
+(2) eap_ttls: (TLS) Handshake state - Server before SSL initialization
+(2) eap_ttls: (TLS) Handshake state - Server before SSL initialization
+(2) eap_ttls: (TLS) recv TLS 1.3 Handshake, ClientHello
+(2) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS read client hello
+(2) eap_ttls: (TLS) send TLS 1.3 Handshake, ServerHello
+(2) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS write server hello
+(2) eap_ttls: (TLS) send TLS 1.3 ChangeCipherSpec
+(2) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS write change cipher spec
+(2) eap_ttls: (TLS) send TLS 1.3 Handshake, EncryptedExtensions
+(2) eap_ttls: (TLS) Handshake state - Server TLSv1.3 write encrypted extensions
+(2) eap_ttls: (TLS) send TLS 1.3 Handshake, Certificate
+(2) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS write certificate
+(2) eap_ttls: (TLS) send TLS 1.3 Handshake, CertificateVerify
+(2) eap_ttls: (TLS) Handshake state - Server TLSv1.3 write server certificate verify
+(2) eap_ttls: (TLS) send TLS 1.3 Handshake, Finished
+(2) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS write finished
+(2) eap_ttls: (TLS) Handshake state - Server TLSv1.3 early data
+(2) eap_ttls: (TLS) Server : Need to read more data: TLSv1.3 early data
+(2) eap_ttls: (TLS) In Handshake Phase
+(2) eap-test: Sending EAP Request (code 1) ID 115 length 994
+(2) eap-test: EAP session adding &reply:State = 0xacb526dcaec6338e
+(2)     [eap-test] = handled
+(2)   } # authenticate = handled
+(2) Using Post-Auth-Type Challenge
+(2) Post-Auth-Type sub-section not found.  Ignoring.
+(2) session-state: Saving cached attributes
+(2)   Framed-MTU = 984
+(2)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(2)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(2) Sent Access-Challenge Id 244 from 127.0.0.1:1812 to 127.0.0.1:50758 length 1058
+(2)   EAP-Message = 0x017303e215c000000b27160303007a020000760303a7eaf2989fd4c47b7b7d660dc0cc238274a289a0ed165d2ba986a79395c7671920b81c864e688395c909ea1e4bd13d75a41bf78113d8e6947144e33fabacc188ce130200002e002b0002030400330024001d0020ad910da1b0f212749318c2eb7e7ef3c1de2cd87f60e40c5d7ace52ef24e9d2331403030001011703030017f4a7498a9fdf3324c193a6558f95f93449af2eecc456c01703030919599564d00e3cd180228d7524734d6e5b37acf7b5ac8089d310d9dc15edee1e897a870c398bb93d0624cceb1ba3369b4c6023012dc09e4a885490ee7623e4b30f8985f0b79780df12286a0339958d6ee4a9551f6fa6d497655c8efa290d4878d51c67ba891d559920ff315d36a740980e9b2dfa666494c31c07fef9d62f7693dfaf7db94d97ec7e02ff1b4ed4ed820fef39c5bfd237406302e175de407d0e753808709a0aae2e1991b4e40232d77e26c664fe0eb4fb126154495fd0ec0f846617340703c1c264f8
+(2)   Message-Authenticator = 0x00000000000000000000000000000000
+(2)   State = 0xacb526dcaec6338ebde94534305b14a5
+(2) Finished request
+Waking up in 4.9 seconds.
+(3) Received Access-Request Id 245 from 127.0.0.1:50758 to 127.0.0.1:1812 length 188
+(3)   User-Name = "anonymous"
+(3)   NAS-IP-Address = 127.0.0.1
+(3)   NAS-Identifier = "hostapd"
+(3)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(3)   NAS-Port-Type = Wireless-802.11
+(3)   Service-Type = Framed-User
+(3)   Calling-Station-Id = "52-54-00-12-34-57"
+(3)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(3)   Acct-Session-Id = "ED5DFD019D4601D4"
+(3)   Framed-MTU = 1400
+(3)   EAP-Message = 0x027300061500
+(3)   State = 0xacb526dcaec6338ebde94534305b14a5
+(3)   Message-Authenticator = 0xcfb7c8f226f94b52ed03d415e5275cd6
+(3) Restoring &session-state
+(3)   &session-state:Framed-MTU = 984
+(3)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(3)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(3) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(3)   authorize {
+(3)     if (User-Name == "bob") {
+(3)     if (User-Name == "bob")  -> FALSE
+(3)     [mschap] = noop
+(3) eap-test: Peer sent EAP Response (code 2) ID 115 length 6
+(3) eap-test: Continuing tunnel setup
+(3)     [eap-test] = ok
+(3)     [pap] = noop
+(3)   } # authorize = ok
+(3) Found Auth-Type = eap-test
+(3) # Executing group from file /etc/freeradius/sites-enabled/test
+(3)   authenticate {
+(3) eap-test: Expiring EAP session with state 0xacb526dcaec6338e
+(3) eap-test: Finished EAP session with state 0xacb526dcaec6338e
+(3) eap-test: Previous EAP request found for state 0xacb526dcaec6338e, released from the list
+(3) eap-test: Peer sent packet with method EAP TTLS (21)
+(3) eap-test: Calling submodule eap_ttls to process data
+(3) eap_ttls: Authenticate
+(3) eap_ttls: (TLS) Peer ACKed our handshake fragment
+(3) eap-test: Sending EAP Request (code 1) ID 116 length 994
+(3) eap-test: EAP session adding &reply:State = 0xacb526dcafc1338e
+(3)     [eap-test] = handled
+(3)   } # authenticate = handled
+(3) Using Post-Auth-Type Challenge
+(3) Post-Auth-Type sub-section not found.  Ignoring.
+(3) session-state: Saving cached attributes
+(3)   Framed-MTU = 984
+(3)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(3)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(3) Sent Access-Challenge Id 245 from 127.0.0.1:1812 to 127.0.0.1:50758 length 1058
+(3)   EAP-Message = 0x017403e215c000000b2758b944ea8d1e30b013324e9d1ff342cfba08d9a7a1f243f6d8dd3881be6387fca25c8aa437fff0a4c1ddaa2b3e4c7e276f4c2f3e10399ba5dbb73305a42115b117bb64babfb641057f2c32eff906c8a567a65d3848476997092e51636874dac3066328851f3fa657ed540c43c0a87051e5f5e76dcbdc278276921477d47d3b9539a5d1b28b1393f63dcc8dfc9d89fd338d16a6746a6b28439049babe6a8ba9eca2996bd202cc86bdcbcacfd74df6c0c7db3a0b2402f33c4f3ecf0bb07f45b6638847f1e644c99b67f348f539bdcd29229c35dbde9a4eac887ac14925f7d81c84d27c048701daa67c8cf42daa6613a63c87a23c25c1418282a1276e51926dd80609ca5c24b32cefd21ed6c924bbed63e1ee2ab669e97e86169ccb454fddbab8463b88f60bd0f64cbf3ce15eee7a2814c21e7c3efe504503281f1b3526aff7e6e9c1142c2521f1d9dedf5b7c632601db9c7b4558c08a4bdc9ad1d82a9ac259f13dd217aa4b004ed208e44c0957a8
+(3)   Message-Authenticator = 0x00000000000000000000000000000000
+(3)   State = 0xacb526dcafc1338ebde94534305b14a5
+(3) Finished request
+Waking up in 4.9 seconds.
+(4) Received Access-Request Id 246 from 127.0.0.1:50758 to 127.0.0.1:1812 length 188
+(4)   User-Name = "anonymous"
+(4)   NAS-IP-Address = 127.0.0.1
+(4)   NAS-Identifier = "hostapd"
+(4)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(4)   NAS-Port-Type = Wireless-802.11
+(4)   Service-Type = Framed-User
+(4)   Calling-Station-Id = "52-54-00-12-34-57"
+(4)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(4)   Acct-Session-Id = "ED5DFD019D4601D4"
+(4)   Framed-MTU = 1400
+(4)   EAP-Message = 0x027400061500
+(4)   State = 0xacb526dcafc1338ebde94534305b14a5
+(4)   Message-Authenticator = 0x6580da75839570cdb86658c04ed433c9
+(4) Restoring &session-state
+(4)   &session-state:Framed-MTU = 984
+(4)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(4)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(4) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(4)   authorize {
+(4)     if (User-Name == "bob") {
+(4)     if (User-Name == "bob")  -> FALSE
+(4)     [mschap] = noop
+(4) eap-test: Peer sent EAP Response (code 2) ID 116 length 6
+(4) eap-test: Continuing tunnel setup
+(4)     [eap-test] = ok
+(4)     [pap] = noop
+(4)   } # authorize = ok
+(4) Found Auth-Type = eap-test
+(4) # Executing group from file /etc/freeradius/sites-enabled/test
+(4)   authenticate {
+(4) eap-test: Expiring EAP session with state 0xacb526dcafc1338e
+(4) eap-test: Finished EAP session with state 0xacb526dcafc1338e
+(4) eap-test: Previous EAP request found for state 0xacb526dcafc1338e, released from the list
+(4) eap-test: Peer sent packet with method EAP TTLS (21)
+(4) eap-test: Calling submodule eap_ttls to process data
+(4) eap_ttls: Authenticate
+(4) eap_ttls: (TLS) Peer ACKed our handshake fragment
+(4) eap-test: Sending EAP Request (code 1) ID 117 length 897
+(4) eap-test: EAP session adding &reply:State = 0xacb526dca8c0338e
+(4)     [eap-test] = handled
+(4)   } # authenticate = handled
+(4) Using Post-Auth-Type Challenge
+(4) Post-Auth-Type sub-section not found.  Ignoring.
+(4) session-state: Saving cached attributes
+(4)   Framed-MTU = 984
+(4)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(4)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(4) Sent Access-Challenge Id 246 from 127.0.0.1:1812 to 127.0.0.1:50758 length 961
+(4)   EAP-Message = 0x01750381158000000b27e0e758cb034f5cb68a236bf33dbb27b1f108adbe1187e0fafcdb049061ccf8f38b962bcb653bd3423a27f275f898185ae3db59c66a2b278c89ce4a8691824b8b8dd8161fdf35365e5978c21b61c20c809bfce187ea72ef1f5ed1769cc1bb4526e1f4ec60389b24aa080e1ea9bba32fcffc6ea6b8e847f22186d57015db21c70ed888ea2eaf6f7d5205a0dfb7e41b79b1c3b5f26b15c0dc611a540d0ef45b2faed1201bd13e6489920b3b6e8514d522f47d3f41440ca3ef44fb72c7620e8229c1ec26fc88dc4be26b59cfbc9890ce13c83f3e62a174993fc1ef8eed9e9bdc2d311f7f3a4c32f203fc62c860937efe82bd4c10e7f7eb1b9c9f959ca38878fc35f3b4adde2244a9ebfd677ad696af972083acb3f8d57203604f504e6cdf03706cbafb20f80d538868e1bb5f044f731a424acc9b76f136332f65ee205fde689df06a797a1a260ce0ce5d2098e905c60f793aa24eef1cd9d25fe3a8256843d7c915cd9340f9f2a6c9c0754aff197a01
+(4)   Message-Authenticator = 0x00000000000000000000000000000000
+(4)   State = 0xacb526dca8c0338ebde94534305b14a5
+(4) Finished request
+Waking up in 4.9 seconds.
+(5) Received Access-Request Id 247 from 127.0.0.1:50758 to 127.0.0.1:1812 length 398
+(5)   User-Name = "anonymous"
+(5)   NAS-IP-Address = 127.0.0.1
+(5)   NAS-Identifier = "hostapd"
+(5)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(5)   NAS-Port-Type = Wireless-802.11
+(5)   Service-Type = Framed-User
+(5)   Calling-Station-Id = "52-54-00-12-34-57"
+(5)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(5)   Acct-Session-Id = "ED5DFD019D4601D4"
+(5)   Framed-MTU = 1400
+(5)   EAP-Message = 0x027500d81580000000ce1403030001011703030045c242a7712b4736c9bf110a5544af55cd6c7aeccc35a25d68190428c7d802db140ca4f42b834c56cc06f9e614a487150fbd277c6d14e91cd4cb2b39b01eab250abd1efeee6e17030300793c046aca2e7401e7d97abb431d0c567ebb531ad9803b6c5e85afda18365f1015b2aa05d8ca5362e1f5a8a88fdeac052c64b0e312108719ae660bdc90c24d99426eabb5e494d3df649ae92270aec1833d7409c4d939167ae5abc799b52ce2f60af1d0ff36de3942b158fbacfc7e158dae70489e7e7a97bcf6b8
+(5)   State = 0xacb526dca8c0338ebde94534305b14a5
+(5)   Message-Authenticator = 0x835407c58a8bb0e8a8fb591aad22ec64
+(5) Restoring &session-state
+(5)   &session-state:Framed-MTU = 984
+(5)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(5)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(5) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(5)   authorize {
+(5)     if (User-Name == "bob") {
+(5)     if (User-Name == "bob")  -> FALSE
+(5)     [mschap] = noop
+(5) eap-test: Peer sent EAP Response (code 2) ID 117 length 216
+(5) eap-test: Continuing tunnel setup
+(5)     [eap-test] = ok
+(5)     [pap] = noop
+(5)   } # authorize = ok
+(5) Found Auth-Type = eap-test
+(5) # Executing group from file /etc/freeradius/sites-enabled/test
+(5)   authenticate {
+(5) eap-test: Expiring EAP session with state 0xacb526dca8c0338e
+(5) eap-test: Finished EAP session with state 0xacb526dca8c0338e
+(5) eap-test: Previous EAP request found for state 0xacb526dca8c0338e, released from the list
+(5) eap-test: Peer sent packet with method EAP TTLS (21)
+(5) eap-test: Calling submodule eap_ttls to process data
+(5) eap_ttls: Authenticate
+(5) eap_ttls: (TLS) EAP Peer says that the final record size will be 206 bytes
+(5) eap_ttls: (TLS) EAP Got all data (206 bytes)
+(5) eap_ttls: (TLS) Handshake state - Server TLSv1.3 early data
+(5) eap_ttls: (TLS) recv TLS 1.3 Handshake, Finished
+(5) eap_ttls: (TLS) Handshake state - Server SSLv3/TLS read finished
+(5) eap_ttls: (TLS) Handshake state - SSL negotiation finished successfully
+(5) eap_ttls: (TLS) recv TLS 1.3 Handshake, Finished
+(5) eap_ttls: Session established.  Proceeding to decode tunneled attributes
+(5) eap_ttls: Got tunneled request
+(5) eap_ttls:   User-Name = "bob"
+(5) eap_ttls:   MS-CHAP-Challenge = 0xa6e6f9c2822dbf1141dad78e337a544e
+(5) eap_ttls:   MS-CHAP2-Response = 0xc30023b7e589f19c55a5b8d9b257ef2f23c2000000000000000007e31fd03e347f0f34fb3613249d210b0e832e7f8d695ffc
+(5) eap_ttls:   FreeRADIUS-Proxied-To = 127.0.0.1
+(5) eap_ttls: Sending tunneled request
+(5) Virtual server eap-test-inner received request
+(5)   User-Name = "bob"
+(5)   MS-CHAP-Challenge = 0xa6e6f9c2822dbf1141dad78e337a544e
+(5)   MS-CHAP2-Response = 0xc30023b7e589f19c55a5b8d9b257ef2f23c2000000000000000007e31fd03e347f0f34fb3613249d210b0e832e7f8d695ffc
+(5)   FreeRADIUS-Proxied-To = 127.0.0.1
+(5) server eap-test-inner {
+(5)   # Executing section authorize from file /etc/freeradius/sites-enabled/eap-test-tunnel
+(5)     authorize {
+(5)       policy filter_username {
+(5)         if (&User-Name) {
+(5)         if (&User-Name)  -> TRUE
+(5)         if (&User-Name)  {
+(5)           if (&User-Name =~ / /) {
+(5)           if (&User-Name =~ / /)  -> FALSE
+(5)           if (&User-Name =~ /@[^@]*@/ ) {
+(5)           if (&User-Name =~ /@[^@]*@/ )  -> FALSE
+(5)           if (&User-Name =~ /\.\./ ) {
+(5)           if (&User-Name =~ /\.\./ )  -> FALSE
+(5)           if ((&User-Name =~ /@/) && (&User-Name !~ /@(.+)\.(.+)$/))  {
+(5)           if ((&User-Name =~ /@/) && (&User-Name !~ /@(.+)\.(.+)$/))   -> FALSE
+(5)           if (&User-Name =~ /\.$/)  {
+(5)           if (&User-Name =~ /\.$/)   -> FALSE
+(5)           if (&User-Name =~ /@\./)  {
+(5)           if (&User-Name =~ /@\./)   -> FALSE
+(5)         } # if (&User-Name)  = notfound
+(5)       } # policy filter_username = notfound
+(5)       if (User-Name == "bob") {
+(5)       if (User-Name == "bob")  -> TRUE
+(5)       if (User-Name == "bob")  {
+(5)         update control {
+(5)           Cleartext-Password := "bob"
+(5)         } # update control = noop
+(5)       } # if (User-Name == "bob")  = noop
+(5)       [chap] = noop
+(5) mschap: Found MS-CHAP attributes.  Setting 'Auth-Type  = mschap'
+(5)       [mschap] = ok
+(5) suffix: Checking for suffix after "@"
+(5) suffix: No '@' in User-Name = "bob", looking up realm NULL
+(5) suffix: No such realm "NULL"
+(5)       [suffix] = noop
+(5)       update control {
+(5)         &Proxy-To-Realm := LOCAL
+(5)       } # update control = noop
+(5) eap-test: No EAP-Message, not doing EAP
+(5)       [eap-test] = noop
+(5)       [files] = noop
+(5) pap: WARNING: Auth-Type already set.  Not setting to PAP
+(5)       [pap] = noop
+(5)     } # authorize = ok
+(5)   Found Auth-Type = mschap
+(5)   # Executing group from file /etc/freeradius/sites-enabled/eap-test-tunnel
+(5)     authenticate {
+(5) mschap: Found Cleartext-Password, hashing to create NT-Password
+(5) mschap: Creating challenge hash with username: bob
+(5) mschap: Client is using MS-CHAPv2
+(5) mschap: Adding MS-CHAPv2 MPPE keys
+(5)       [mschap] = ok
+(5)     } # authenticate = ok
+(5)   # Executing section post-auth from file /etc/freeradius/sites-enabled/eap-test-tunnel
+(5)     post-auth {
+(5)       update reply {
+(5)         &Tunnel-Private-Group-ID = "test"
+(5)       } # update reply = noop
+(5)     } # post-auth = noop
+(5) } # server eap-test-inner
+(5) Virtual server sending reply
+(5)   MS-CHAP2-Success = 0xc3533d31434243394645443343373143384338334639424235433045334546394136464342313030353334
+(5)   MS-MPPE-Recv-Key = 0x3ea63a2d612c136e4061eff488e3a7ce
+(5)   MS-MPPE-Send-Key = 0x41cc71584fb9fc862417648fc502bc42
+(5)   MS-MPPE-Encryption-Policy = Encryption-Allowed
+(5)   MS-MPPE-Encryption-Types = RC4-40or128-bit-Allowed
+(5)   Tunnel-Private-Group-Id = "test"
+(5) eap_ttls: Got tunneled Access-Accept
+(5) eap_ttls: Got MS-CHAP2-Success, tunneling it to the client in a challenge
+(5) eap_ttls: Sending tunneled reply attributes
+(5) eap_ttls:   MS-CHAP2-Success = 0xc3533d31434243394645443343373143384338334639424235433045334546394136464342313030353334
+(5) eap_ttls: (TLS) send TLS 1.3 Handshake, Finished
+(5) eap-test: Sending EAP Request (code 1) ID 118 length 88
+(5) eap-test: EAP session adding &reply:State = 0xacb526dca9c3338e
+(5)     [eap-test] = handled
+(5)   } # authenticate = handled
+(5) Using Post-Auth-Type Challenge
+(5) Post-Auth-Type sub-section not found.  Ignoring.
+(5) session-state: Saving cached attributes
+(5)   Framed-MTU = 984
+(5)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(5)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(5)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(5)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(5) Sent Access-Challenge Id 247 from 127.0.0.1:1812 to 127.0.0.1:50758 length 146
+(5)   EAP-Message = 0x0176005815800000004e1703030049673a037be7acbfd42feae44fb9f329896b6279278fb397202ad33fe1fb05e2721c4ddfe91fa343b129f9bddcdae4fb48681007b628548ec7e7f84a5844fc292a67cc85d8a7035626e4
+(5)   Message-Authenticator = 0x00000000000000000000000000000000
+(5)   State = 0xacb526dca9c3338ebde94534305b14a5
+(5) Finished request
+Waking up in 4.9 seconds.
+(6) Received Access-Request Id 248 from 127.0.0.1:50758 to 127.0.0.1:1812 length 188
+(6)   User-Name = "anonymous"
+(6)   NAS-IP-Address = 127.0.0.1
+(6)   NAS-Identifier = "hostapd"
+(6)   Called-Station-Id = "36-B9-21-FD-35-3F:"
+(6)   NAS-Port-Type = Wireless-802.11
+(6)   Service-Type = Framed-User
+(6)   Calling-Station-Id = "52-54-00-12-34-57"
+(6)   Connect-Info = "CONNECT 0Mbps 802.11b"
+(6)   Acct-Session-Id = "ED5DFD019D4601D4"
+(6)   Framed-MTU = 1400
+(6)   EAP-Message = 0x027600061500
+(6)   State = 0xacb526dca9c3338ebde94534305b14a5
+(6)   Message-Authenticator = 0x200f8e5da831b0502c8bacc5c4f08953
+(6) Restoring &session-state
+(6)   &session-state:Framed-MTU = 984
+(6)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(6)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(6)   &session-state:TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(6)   &session-state:TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(6) # Executing section authorize from file /etc/freeradius/sites-enabled/test
+(6)   authorize {
+(6)     if (User-Name == "bob") {
+(6)     if (User-Name == "bob")  -> FALSE
+(6)     [mschap] = noop
+(6) eap-test: Peer sent EAP Response (code 2) ID 118 length 6
+(6) eap-test: Continuing tunnel setup
+(6)     [eap-test] = ok
+(6)     [pap] = noop
+(6)   } # authorize = ok
+(6) Found Auth-Type = eap-test
+(6) # Executing group from file /etc/freeradius/sites-enabled/test
+(6)   authenticate {
+(6) eap-test: Expiring EAP session with state 0xacb526dca9c3338e
+(6) eap-test: Finished EAP session with state 0xacb526dca9c3338e
+(6) eap-test: Previous EAP request found for state 0xacb526dca9c3338e, released from the list
+(6) eap-test: Peer sent packet with method EAP TTLS (21)
+(6) eap-test: Calling submodule eap_ttls to process data
+(6) eap_ttls: Authenticate
+(6) eap_ttls: (TLS) Peer ACKed our handshake fragment
+(6) eap-test: Sending EAP Request (code 1) ID 119 length 10
+(6) eap-test: EAP session adding &reply:State = 0xacb526dcaac2338e
+(6)     [eap-test] = handled
+(6)   } # authenticate = handled
+(6) Using Post-Auth-Type Challenge
+(6) Post-Auth-Type sub-section not found.  Ignoring.
+(6) session-state: Saving cached attributes
+(6)   Framed-MTU = 984
+(6)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, ClientHello"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, ServerHello"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 ChangeCipherSpec"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, EncryptedExtensions"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Certificate"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, CertificateVerify"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(6)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(6)   TLS-Session-Information = "(TLS) recv TLS 1.3 Handshake, Finished"
+(6)   TLS-Session-Information = "(TLS) send TLS 1.3 Handshake, Finished"
+(6) Sent Access-Challenge Id 248 from 127.0.0.1:1812 to 127.0.0.1:50758 length 68
+(6)   EAP-Message = 0x0177000a158000000000
+(6)   Message-Authenticator = 0x00000000000000000000000000000000
+(6)   State = 0xacb526dcaac2338ebde94534305b14a5
+(6) Finished request
+Waking up in 4.9 seconds.
+(0) Cleaning up request packet ID 242 with timestamp +14 due to cleanup_delay was reached
+(1) Cleaning up request packet ID 243 with timestamp +14 due to cleanup_delay was reached
+(2) Cleaning up request packet ID 244 with timestamp +14 due to cleanup_delay was reached
+(3) Cleaning up request packet ID 245 with timestamp +14 due to cleanup_delay was reached
+(4) Cleaning up request packet ID 246 with timestamp +14 due to cleanup_delay was reached
+(5) Cleaning up request packet ID 247 with timestamp +14 due to cleanup_delay was reached
+(6) Cleaning up request packet ID 248 with timestamp +14 due to cleanup_delay was reached
+Ready to process requests
