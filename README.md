@@ -172,7 +172,7 @@ Inside the container, run in one terminal `tcpdump` set to capture all RADIUS au
 
     tcpdump -n -p -i lo -w - -U port 1812 | tee /tmp/dump.pcap | tcpdump -n -v -r -
 
-**N.B.** alternatively you run this step on the host end against the `docker0` network interface
+From another terminal in the container, run:
 
     systemctl stop freeradius
     rm -f /tmp/sslkey.log
