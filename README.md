@@ -199,7 +199,7 @@ On your host:
 To use Windows 11 Insider Preview (Dev Channel, tested with build 22499, upgraded to 22504.1000) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
 
     docker build -t swtpm swtpm
-    docker run -v "$PWD/swtpm/state:/run/swtpm" swtpm
+    docker run --rm -v "$PWD/swtpm/state:/run/swtpm" swtpm
 
 Once running, you can use the enclosed script:
 
