@@ -138,7 +138,7 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
              * [`debug`](./wireshark-examples/win11/peap-eap-tls/debug)
              * [`dump.pcap`](./wireshark-examples/win11/peap-eap-tls/dump.pcap)
              * [`sslkey.log`](./wireshark-examples/win11/peap-eap-tls/sslkey.log)
-     * EAP-TTLS - requires [patches](https://github.com/FreeRADIUS/freeradius-server/compare/v3.0.x...jimdigriz:eaptls13)
+     * EAP-TTLS - requires at least [v3.0.26](https://github.com/FreeRADIUS/freeradius-server/compare/305c3a34671da66ab5bb9ad8920e012606ddf2b5..dd50296b26659432c138c02a4746dbfbd4489496) which is not yet released
          * PAP
              * [`debug`](./wireshark-examples/win11/ttls-pap/debug)
              * [`dump.pcap`](./wireshark-examples/win11/ttls-pap/dump.pcap)
