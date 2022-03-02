@@ -1,9 +1,9 @@
-FROM alpine:3.14
+FROM alpine:3.15
 
 SHELL ["/bin/sh", "-x", "-c"]
 
 ARG libtpms=0.9
-ARG swtpm=0.6
+ARG swtpm=0.7
 
 RUN apk --no-cache add \
 	autoconf \
