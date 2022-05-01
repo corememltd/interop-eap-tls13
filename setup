@@ -4,6 +4,9 @@ set -eux
 
 [ "${VENDOR:-}" -a "${PROJECT:-}" ] || { echo missing VENDOR/PROJECT environment variables; exit 1; }
 
+. /etc/os-release
+[ "${VERSION:-}" ] || EXPERIMENTAL=1
+
 : ${REPO:=https://github.com/FreeRADIUS/freeradius-server.git}
 : ${BRANCH:=v3.0.x}
 : ${TAG:=v3.0.x}
@@ -21,7 +24,10 @@ export DEBIAN_FRONTEND=noninteractive
 apt-get update
 apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
 		--option=Dpkg::options::=--force-unsafe-io install --no-install-recommends \
+	auto-apt-proxy \
 	eatmydata
+
+[ ! "${APT_PROXY:-}" ] || printf "%s\tapt-proxy\n" "$APT_PROXY" >> /etc/hosts
 
 export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libeatmydata.so
 
@@ -32,6 +38,7 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 		--option=Dpkg::options::=--force-unsafe-io install --no-install-recommends \
 	autoconf \
 	automake \
+	${OPENSSL:+bc} \
 	build-essential \
 	ca-certificates \
 	cmake \
@@ -39,8 +46,10 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	dbus \
 	debhelper \
 	default-libmysqlclient-dev \
+	dpkg-dev \
 	systemd \
 	fakeroot \
+	freetds-dev \
 	git \
 	hostapd \
 	iproute2 \
@@ -65,7 +74,7 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	libreadline-dev \
 	libsasl2-dev \
 	libsqlite3-dev \
-	libssl-dev \
+	libssl-dev${EXPERIMENTAL:+/experimental} \
 	libsystemd-dev \
 	libtalloc-dev \
 	libtool \
@@ -75,7 +84,8 @@ apt-get -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-conf
 	make \
 	openssl \
 	pkg-config \
-	python-dev \
+	python2-dev \
+	python3-dev \
 	quilt \
 	samba-dev \
 	ssl-cert \
@@ -106,6 +116,22 @@ fi
 
 shred -u /tmp/$VENDOR-$PROJECT.git
 
+if [ "${OPENSSL:-}" ]; then
+	mkdir -p /usr/src/openssl
+	cd /usr/src/openssl
+	curl -f \
+		-L -O -J http://deb.debian.org/debian/pool/main/o/openssl/openssl_${OPENSSL}-1.dsc \
+		-L -O -J http://deb.debian.org/debian/pool/main/o/openssl/openssl_${OPENSSL}.orig.tar.gz \
+		-L -O -J http://deb.debian.org/debian/pool/main/o/openssl/openssl_${OPENSSL}.orig.tar.gz.asc \
+		-L -O -J http://deb.debian.org/debian/pool/main/o/openssl/openssl_${OPENSSL}-1.debian.tar.xz
+	dpkg-source -x openssl_${OPENSSL}-1.dsc
+	cd openssl-${OPENSSL}
+	sed -i.bak -e 's/ -fzero-call-used-regs=used-gpr//' debian/patches/debian-targets.patch Configurations/20-debian.conf
+	dpkg-source --commit . x-interop-trim-flag </dev/null
+	env DEB_BUILD_OPTIONS=nocheck dpkg-buildpackage -rfakeroot -us -uc
+	dpkg -i ../libssl3_3.0.2-1_amd64.deb ../openssl_3.0.2-1_amd64.deb ../libssl-dev_3.0.2-1_amd64.deb
+fi
+
 (
 	set -eu
 	cd /usr/src
@@ -115,11 +141,12 @@ shred -u /tmp/$VENDOR-$PROJECT.git
 		git reset --hard
 		git pull
 	else
-		git clone --single-branch --branch master https://w1.fi/hostap.git
+		git clone --single-branch --branch main https://w1.fi/hostap.git
 		cd hostap
 	fi
+	git checkout hostap_2_10
 
-	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/' wpa_supplicant/defconfig > wpa_supplicant/.config
+	sed -e 's/^#CONFIG_EAPOL_TEST=y/CONFIG_EAPOL_TEST=y/; $a\CFLAGS += -Wno-error=deprecated-declarations' wpa_supplicant/defconfig > wpa_supplicant/.config
 	make -C wpa_supplicant -j$(($(getconf _NPROCESSORS_ONLN)+1)) eapol_test
 	ln -f -s -t /usr/local/bin $(pwd)/wpa_supplicant/eapol_test
 )
@@ -186,6 +213,7 @@ ln -f -s /opt/$VENDOR/$PROJECT/services/hostapd.conf /etc/hostapd/hostapd.conf
 systemctl unmask hostapd.service
 systemctl enable hostapd.service
 
+[ "${PACKER_BUILDER_TYPE:-}" = docker ] || sed -i -e '/apt-proxy/ d' /etc/hosts
 unset LD_PRELOAD
 sync
 

@@ -10,8 +10,23 @@ REPO ?= https://github.com/FreeRADIUS/freeradius-server.git
 BRANCH ?= v3.0.x
 TAG ?= release_3_0_25
 
+ifneq ($(OPENSSL3),)
+FROM ?= debian:experimental
+endif
+
 PACKER_VERSION = 1.7.8
 PACKER_BUILD_FLAGS += -var vendor=$(VENDOR) -var project=$(PROJECT) -var commit=$(COMMITID) -var repo=$(REPO) -var branch=$(BRANCH) -var tag=$(TAG)
+ifneq ($(FROM),)
+PACKER_BUILD_FLAGS += -var from=$(FROM)
+endif
+ifneq ($(OPENSSL),)
+PACKER_BUILD_FLAGS += -var openssl=$(OPENSSL)
+endif
+
+APT_PROXY ?= $(shell docker inspect -f '{{ .NetworkSettings.IPAddress }}' apt-cacher-ng 2>/dev/null)
+ifneq ($(APT_PROXY),)
+PACKER_BUILD_FLAGS += -var apt_proxy=$(APT_PROXY)
+endif
 
 KERNEL = $(shell uname -s | tr A-Z a-z)
 ifneq ($(KERNEL),darwin)
@@ -77,9 +92,6 @@ dev: .stamp.docker
 
 ifeq ($(shell docker images -q $(VENDOR)/$(PROJECT)),)
 .PHONY: .stamp.docker
-endif
-ifneq ($(FROM),)
-.stamp.docker: PACKER_BUILD_FLAGS += -var from=$(FROM)
 endif
 .stamp.docker: setup.json .stamp.packer setup
 	env TMPDIR=$(CURDIR) ./packer build -on-error=ask -only docker $(PACKER_BUILD_FLAGS) $<

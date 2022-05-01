@@ -101,7 +101,7 @@ If you are using a server, try:
 
     rsync -rv --rsync-path 'sudo rsync' server.example.com:/etc/freeradius/certs .
 
-From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` (password '`whatever`') onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should b able to validate the hostname CN against `Example Server Certificate`.
+From that directory, import `ca.{pem,der}` and `client.{{pem,key},p12}` (password '`whatever`') onto your system; Windows users should make sure to import the CA into the 'Trusted Root Certificate Authorities' and not use the automatic option. Once done you should be able to validate the hostname CN against `Example Server Certificate`.
 
 ### TLS Configuration
 
@@ -196,18 +196,20 @@ On your host:
 
 ### Microsoft Windows 11
 
-To use Windows 11 Insider Preview (Dev Channel, tested with build 22499, upgraded to 22504.1000) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
+To use Windows 11 Insider Preview (Dev Channel, tested with build 22579, upgraded to ?????.?) you will need QEMU (tested with version 5.2.0) and to have built and started a [software based TPM](https://github.com/stefanberger/swtpm):
 
     docker build -t swtpm swtpm
-    docker run --rm -v "$PWD/swtpm/state:/run/swtpm" swtpm
+    docker run --rm --name swtpm -v "$PWD/swtpm/state:/run/swtpm" swtpm
 
 Once running, you can use the enclosed script:
 
-    env ISO=Windows11_InsiderPreview_Client_x64_en-gb_22499.iso sh -x qemu-win11.sh
+    env ISO=Windows11_InsiderPreview_Client_x64_en-us_22579.iso sh -x qemu-win11.sh
 
 Connect to the VM using the [Spice client](https://www.spice-space.org/):
 
     spicy -h 127.0.0.1 -p 5930
+
+**N.B.** make sure you install 'Windows 11 *Pro*' (not 'Home') otherwise it refuses to proceed until you have networking and will not let you set up the VirtIO drivers
 
 The script will also fetch the [virtio-win drivers](https://github.com/virtio-win/virtio-win-pkg-scripts) and add a CD mount in the VM so drivers are available for the VirtIO devices as well as the including the Spice guest agent.
 
@@ -288,15 +290,18 @@ Where the configuration values are described as:
  * **`PORT` (default: `1812`):** sets the port number that RADIUS authentication is exposed on your workstation
  * **`FROM` (default: [`debian:bullseye-slim`](https://hub.docker.com/_/debian/)):** sets the base Docker image to build on
      * [`ubuntu:focal`](https://hub.docker.com/_/ubuntu/) is also known to work
+     * `debian:experimental`: works and will enable OpenSSL 3.x support, though you should also set `TAG=HEAD`
  * **`FREERADIUS_REPO`:** if you want to work on a local tree, set this to the path of your local FreeRADIUS source tree and run the following inside the container to build and apply (do not install the 'config' Debian package!):
 
            make -C /usr/src/freeradius-server deb
-           dpkg -i /usr/src/{freeradius,libfreeradius3}_*_amd64.deb
+           dpkg -i /usr/src/{freeradius,libfreeradius3,freeradius-utils,freeradius-common}_*.deb
 
  * **`REPO` (default: `https://github.com/FreeRADIUS/freeradius-server.git`):** sets the repo source of FreeRADIUS to use
  * **`BRANCH` (default: `v3.0.x`):** sets the branch of FreeRADIUS to use
  * **`TAG` (default: `release_3_0_25`):** sets the tag of FreeRADIUS to use
      * when using a custom branch where no tag is avaliable you should use `HEAD` here
+ * **`OPENSSL` (default is unset):** sets the version to download
+     * only supports `3.0.2` as an option
 
 Additional information about the environment:
 
@@ -305,6 +310,14 @@ Additional information about the environment:
          * [`services`](services): `services` configuration (including `freeradius`)
          * [`eapol_test`](eapol_test): `eapol_test` configuration files
      * changes to these folders will be immediately seen inside the docker container. This means you should not need to edit files in the container and remember to copy them back to your project, and after updating `services/freeradius/...` you can restart `freeradius` (`systemctl restart freeradius` or `freeradius -X`) to reason about those changes
+
+#### `apt-cacher-ng`
+
+If you do this often, you may want to run a local `apt-cacher-ng` before starting the build process:
+
+    docker run --rm --name apt-cacher-ng -v "$PWD/apt-cacher-ng":/var/cache/apt-cacher-ng mbentley/apt-cacher-ng
+
+The build will automatically detect if the container is running and plum it in.
 
 ### Server/VM via-SSH
 
