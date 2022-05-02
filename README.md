@@ -166,7 +166,9 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
 
 **N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
 
-**N.B.** Wireshark is currently unable to decode the [inner tunnel of PEAP](https://gitlab.com/coremem/networkradius/wireshark/-/compare/master...eap-peap-inner?from_project_id=31479930&w=1) or any inner EAP-TLS session
+**N.B.** Wireshark 'stable' (3.6.x) is unable to decode the [inner tunnel of PEAP, TEAP packets with Outer-TLV's or EAPOL TLS frames](https://gitlab.com/wireshark/wireshark/-/merge_requests/6838) but if you use the ['Live on the Bleeding Edge' releases](https://www.wireshark.org/download.html) you will be able to explore those packet captures
+
+**N.B.** Wireshark is unable to decoded inner EAP-TLS (ie. TLS-in-TLS such as {TTLS,PEAP,TEAP}/EAP-TLS)
 
 Inside the container, run in one terminal `tcpdump` set to capture all RADIUS authentication traffic:
 
