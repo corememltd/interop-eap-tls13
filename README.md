@@ -126,45 +126,34 @@ For this to work you will require [Wireshark](https://www.wireshark.org/) to be 
 
  * draft 13 (commitment message):
      * [screenshot](./wireshark-examples/screenshot.png)
-     * [`dump.pcap`](./wireshark-examples/dump.pcap)
-     * [`sslkey.log`](./wireshark-examples/sslkey.log)
+     * [`dump.pcapng`](./wireshark-examples/dump.pcapng)
  * Windows 11
      * PEAP
          * EAP-MSCHAPv2
              * [`debug`](./wireshark-examples/win11/peap-eap-mschapv2/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/peap-eap-mschapv2/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/peap-eap-mschapv2/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/peap-eap-mschapv2/dump.pcapng)
          * EAP-TLS
              * [`debug`](./wireshark-examples/win11/peap-eap-tls/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/peap-eap-tls/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/peap-eap-tls/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/peap-eap-tls/dump.pcapng)
      * EAP-TTLS - requires at least [v3.0.26](https://github.com/FreeRADIUS/freeradius-server/compare/305c3a34671da66ab5bb9ad8920e012606ddf2b5..dd50296b26659432c138c02a4746dbfbd4489496) which is not yet released
          * PAP
              * [`debug`](./wireshark-examples/win11/ttls-pap/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-pap/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-pap/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-pap/dump.pcapng)
          * CHAP
              * [`debug`](./wireshark-examples/win11/ttls-chap/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-chap/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-chap/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-chap/dump.pcapng)
          * MSCHAP
              * [`debug`](./wireshark-examples/win11/ttls-mschap/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-mschap/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-mschap/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-mschap/dump.pcapng)
          * MSCHAPv2 - not working, under investigation, assuming lack of cryptobinding is the cause
              * [`debug`](./wireshark-examples/win11/ttls-mschapv2/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-mschapv2/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-mschapv2/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-mschapv2/dump.pcapng)
          * EAP-TLS
              * [`debug`](./wireshark-examples/win11/ttls-eap-tls/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-eap-tls/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-eap-tls/sslkey.log)
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-eap-tls/dump.pcapng)
          * EAP-MSCHAPv2
              * [`debug`](./wireshark-examples/win11/ttls-eap-mschapv2/debug)
-             * [`dump.pcap`](./wireshark-examples/win11/ttls-eap-mschapv2/dump.pcap)
-             * [`sslkey.log`](./wireshark-examples/win11/ttls-eap-mschapv2/sslkey.log)
-
-**N.B.** if you do not see the 'Decrypted SSL' tab at the bottom, you may not have the correct SSL key log paired with its PCAP file
+             * [`dump.pcapng`](./wireshark-examples/win11/ttls-eap-mschapv2/dump.pcapng)
 
 **N.B.** Wireshark 'stable' (3.6.x) is unable to decode tunneled TLS (ie. TLS-in-TLS such as `{TTLS,PEAP,TEAP}/EAP-TLS}`), the inner tunnel attributes of PEAP, TEAP packets with Outer-TLV's or EAPOL TLS frames. If you use the ['Live on the Bleeding Edge' releases (at least `1983` with commit `fdf55aaa514b` or just anything dated after 2022-05-09)](https://www.wireshark.org/download.html) you will be able to explore those packet captures
 
@@ -187,12 +176,9 @@ Now run some authentication requests with `eapol_test` in yet another console te
 
 On your host:
 
- 1. open the 'Edit' menu and select 'Preferences'
- 1. open 'Protocols' and select 'TLS' (older versions call it 'SSL') from the list
-     * add '(Pre)-Master-Secret log' by browsing and selecting `sslkey.log`
-     * click on 'OK'
- 1. close the preferences window
- 1. open `dump.pcap` in Wireshark
+    editcap --inject-secrets tls,sslkey.log dump.pcap dump.pcapng
+
+Now open the resulting `dump.pcapng` in Wireshark.
 
 ### Microsoft Windows 11
 
